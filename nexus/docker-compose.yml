@@ -2,12 +2,17 @@ version: "3.7"
 services:
   nexus:
     image: sonatype/nexus3:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.labels.hostname==bohr]
     environment:
-      INSTALL4J_ADD_VM_PARAMS: -Xms128m -Xmx512m -XX:MaxDirectMemorySize=256m
+      INSTALL4J_ADD_VM_PARAMS=$INSTALL4J_ADD_VM_PARAMS
     container_name: nexus3
     restart: always
     ports:
       - 8081:8081
       - 8082:8082
     volumes:
-      -  /home/ubuntu/nexus-data:/nexus-data
+      -  /mnt/nexus-data:/nexus-data
