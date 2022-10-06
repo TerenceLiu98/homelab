@@ -1,8 +1,12 @@
 version: "3.7"
 services:
   nexus:
-    image: sonatype/nexus3:latest
+    image: sonatype/nexus3:3.6.1
     deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 512M
       mode: replicated
       replicas: 1
       placement:
