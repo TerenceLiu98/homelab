@@ -8,6 +8,11 @@ services:
       - 127.0.0.1
       - 1.1.1.1
       - 8.8.8.8
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.hostname==einstein]
     depends_on:
       - db
     environment:
