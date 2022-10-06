@@ -4,9 +4,7 @@ services:
     image: sonatype/nexus3:latest
     deploy:
       mode: replicated
-      replicas: 1
-      placement:
-        constraints: [node.labels.hostname==bohr]
+      replicas: 2
     environment:
       INSTALL4J_ADD_VM_PARAMS: -Xms128m -Xmx512m -XX:MaxDirectMemorySize=256m
     container_name: nexus3
@@ -15,4 +13,4 @@ services:
       - 8081:8081
       - 8082:8082
     volumes:
-      -  /mnt/nexus-data:/nexus-data
+      -  /mnt/nfs/nexus-data:/nexus-data
