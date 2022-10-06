@@ -6,11 +6,11 @@ services:
       mode: replicated
       replicas: 1
     environment:
-      INSTALL4J_ADD_VM_PARAMS: -Xms128m -Xmx512m -XX:MaxDirectMemorySize=256m
+      INSTALL4J_ADD_VM_PARAMS: -Xms128m -Xmx512m -XX:MaxDirectMemorySize=512m
     container_name: nexus3
     restart: always
     ports:
       - 8081:8081
       - 8082:8082
     volumes:
-      -  /mnt/bucket/nexus:/nexus-data:Z
+      -  /mnt/bucket/nexus:/nexus-data
