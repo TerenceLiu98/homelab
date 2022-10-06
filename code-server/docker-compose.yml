@@ -7,7 +7,7 @@ services:
       mode: replicated
       replicas: 1
       placement:
-        constraints: [node.labels.hostname==einstein]
+        constraints: [node.hostname==einstein]
     environment:
       - PUID=1000
       - PGID=1000
