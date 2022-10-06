@@ -12,7 +12,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Shanghai
-      - DEFAULT_WORKSPACE=/mnt/code-server/worespace
+      - DEFAULT_WORKSPACE=/mnt/code-server/workspace
       - PASSWORD=$PASSWORD
     volumes:
       - /mnt/code-server/config:/config
