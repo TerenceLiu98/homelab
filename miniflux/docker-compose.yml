@@ -1,0 +1,38 @@
+version: '3.4'
+services:
+  miniflux:
+    image: miniflux/miniflux:latest
+    ports:
+      - "8801:8080"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=$DATABASE_URL
+      - RUN_MIGRATIONS=$RUN_MIGRATIONS
+      - CREATE_ADMIN=$CREATE_ADMIN
+      - ADMIN_USERNAME=$ADMIN_USERNAME
+      - ADMIN_PASSWORD=$ADMIN_PASSWORD
+      - OAUTH2_USER_CREATION=$OAUTH2_USER_CREATION
+      - OAUTH2_PROVIDER=$OAUTH2_PROVIDER
+      - OAUTH2_CLIENT_ID=$OAUTH2_CLIENT_ID
+      - OAUTH2_CLIENT_SECRET=$OAUTH2_CLIENT_SECRET
+      - OAUTH2_REDIRECT_URL=$OAUTH2_REDIRECT_URL
+      - OAUTH2_OIDC_DISCOVERY_ENDPOINT=$OAUTH2_OIDC_DISCOVERY_ENDPOINT
+  db:
+    image: postgres:latest
+    deploy:
+      mode: replicated
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+    environment:
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+    volumes:
+      - miniflux-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "miniflux"]
+      interval: 10s
+      start_period: 30s
+volumes:
+  miniflux-db:
