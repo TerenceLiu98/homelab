@@ -11,6 +11,3 @@ services:
       - 8082:8082
     volumes:
       -  /home/ubuntu/nexus-data:/nexus-data
-
-volumes:
-  
