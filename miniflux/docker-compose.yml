@@ -5,8 +5,9 @@ services:
     ports:
       - "8801:8080"
     dns:
+      - 127.0.0.1
+      - 1.1.1.1
       - 8.8.8.8
-      - 8.8.4.4
     depends_on:
       - db
     environment:
