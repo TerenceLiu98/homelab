@@ -13,4 +13,4 @@ services:
       - 8081:8081
       - 8082:8082
     volumes:
-      -  /mnt/nfs/nexus-data:/nexus-data
+      -  /mnt/nfs/nexus-data:/nexus-data:Z
