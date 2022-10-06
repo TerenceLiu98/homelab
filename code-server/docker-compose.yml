@@ -1,7 +1,7 @@
 version: "3"
 services:
   code-server:
-    image: ghcr.io/linuxserver/code-server
+    image: linuxserver/code-server:latest
     container_name: code-server
     deploy:
       mode: replicated
