@@ -5,6 +5,8 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+      placement:
+        constraints: [node.hostname==einstein]
     environment:
       INSTALL4J_ADD_VM_PARAMS: -Xms128m -Xmx512m -XX:MaxDirectMemorySize=512m
     container_name: nexus3
