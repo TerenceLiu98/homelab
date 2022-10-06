@@ -6,16 +6,14 @@ services:
     deploy:
       mode: replicated
       replicas: 1
-      placement:
-        constraints: [node.hostname==einstein]
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Shanghai
-      - DEFAULT_WORKSPACE=/mnt/code-server/workspace
+      - DEFAULT_WORKSPACE=$DEFAULT_WORKSPACE
       - PASSWORD=$PASSWORD
     volumes:
-      - /mnt/code-server/config:/config
+      - /mnt/nfs/code-server/config:/config
     ports:
       - 8010:8443
     restart: unless-stopped
