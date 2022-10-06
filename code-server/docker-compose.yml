@@ -3,14 +3,19 @@ services:
   code-server:
     image: ghcr.io/linuxserver/code-server
     container_name: code-server
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.labels.hostname==einstein]
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Shanghai
-      - DEFAULT_WORKSPACE=$PWD
+      - DEFAULT_WORKSPACE=/mnt/code-server/worespace
       - PASSWORD=$PASSWORD
     volumes:
-      - ./config:/config
+      - /mnt/code-server/config:/config
     ports:
       - 8010:8443
     restart: unless-stopped
