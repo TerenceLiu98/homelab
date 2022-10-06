@@ -4,7 +4,7 @@ services:
     image: sonatype/nexus3:latest
     deploy:
       mode: replicated
-      replicas: 2
+      replicas: 1
     environment:
       INSTALL4J_ADD_VM_PARAMS: -Xms128m -Xmx512m -XX:MaxDirectMemorySize=256m
     container_name: nexus3
