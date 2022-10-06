@@ -1,0 +1,16 @@
+version: "3"
+services:
+  code-server:
+    image: ghcr.io/linuxserver/code-server
+    container_name: code-server
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+      - DEFAULT_WORKSPACE=$PWD
+      - PASSWORD=$PASSWORD
+    volumes:
+      - ./config:/config
+    ports:
+      - 8010:8443
+    restart: unless-stopped
