@@ -4,6 +4,9 @@ services:
     image: miniflux/miniflux:latest
     ports:
       - "8801:8080"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     depends_on:
       - db
     environment:
