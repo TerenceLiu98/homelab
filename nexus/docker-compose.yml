@@ -13,4 +13,4 @@ services:
       - 8081:8081
       - 8082:8082
     volumes:
-      -  /home/ubuntu/infrastructure/nexus-repository/nexus-data:/nexus-data:Z
+      -  /mnt/bucket/nexus:/nexus-data:Z
