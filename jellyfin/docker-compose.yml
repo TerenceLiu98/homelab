@@ -1,7 +1,7 @@
 version: "3"
 services:
   jellyfin:
-    image: nyanmisaka/jellyfin:latest
+    image: jellyfin/jellyfin:latest
     container_name: jellyfin
     environment:
       - PUID=1000
