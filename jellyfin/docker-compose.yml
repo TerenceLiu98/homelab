@@ -1,0 +1,17 @@
+version: "3"
+services:
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+    volumes: # map the physical volume to the container
+      - /home/ubuntu/infrastructure/jellyfin/config:/config       
+      - /mnt/daily-storage/media/tvshows: /data/tvshows
+      - /mnt/daily-storage/media/movies:/data/movies
+      - /mnt/daily-storage/media/music:/data/music
+    ports:
+      - 8096:8096
+    restart: always
