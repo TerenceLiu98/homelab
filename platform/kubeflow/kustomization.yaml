@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
   - oauth2-proxy-global-dex-config.yaml
   - storageclass-rbac.yaml
+  - notebook-ui-cluster-reader-rbac.yaml
   - kubeflow-upstream-app.yaml
