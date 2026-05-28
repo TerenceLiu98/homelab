@@ -4,6 +4,12 @@ set -eu
 cd "$(dirname "$0")/.."
 . scripts/load-env.sh
 
+JUICEFS_SECRET_NAME="${JUICEFS_SECRET_NAME:-juicefs-sc-secret}"
+JUICEFS_SECRET_NAMESPACE="${JUICEFS_SECRET_NAMESPACE:-kube-system}"
+JUICEFS_STORAGE="${JUICEFS_STORAGE:-gluster}"
+JUICEFS_BUCKET="${JUICEFS_BUCKET:-${JUICEFS_OBJECT_PATH:-100.118.192.87/storage/gluster}}"
+JUICEFS_ENVS="${JUICEFS_ENVS:-{JFS_DROP_OSCACHE: 1}}"
+
 require_env \
   BASE_DOMAIN \
   GITHUB_CLIENT_ID \
@@ -18,7 +24,7 @@ require_env \
   JUICEFS_NAME \
   JUICEFS_META_PASSWORD \
   JUICEFS_META_HOST \
-  JUICEFS_OBJECT_PATH
+  JUICEFS_BUCKET
 
 mkdir -p rendered
 
@@ -118,15 +124,15 @@ stringData:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: juicefs-secret
-  namespace: storage
+  name: ${JUICEFS_SECRET_NAME}
+  namespace: ${JUICEFS_SECRET_NAMESPACE}
 type: Opaque
 stringData:
   name: "${JUICEFS_NAME}"
-  redis-password: "${JUICEFS_META_PASSWORD}"
   metaurl: "redis://:${JUICEFS_META_PASSWORD}@${JUICEFS_META_HOST}:6379/1"
-  storage: "file"
-  bucket: "${JUICEFS_OBJECT_PATH}"
+  storage: "${JUICEFS_STORAGE}"
+  bucket: "${JUICEFS_BUCKET}"
+  envs: "${JUICEFS_ENVS}"
 EOF
 
 echo "Rendered rendered/secrets.yaml"

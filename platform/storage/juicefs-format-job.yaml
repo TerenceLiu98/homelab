@@ -2,14 +2,14 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: juicefs-format
-  namespace: storage
+  namespace: kube-system
 spec:
   template:
     spec:
       restartPolicy: OnFailure
       containers:
         - name: juicefs
-          image: juicedata/juicefs-csi-driver:v0.25.1
+          image: juicedata/juicefs-csi-driver:v0.31.7
           command:
             - sh
             - -ec
@@ -30,13 +30,7 @@ spec:
             - name: juicefs-secret
               mountPath: /etc/juicefs
               readOnly: true
-            - name: juicefs-objects
-              mountPath: /srv/k3s-data/gluster/mounts/gv0/juicefs-objects
       volumes:
         - name: juicefs-secret
           secret:
-            secretName: juicefs-secret
-        - name: juicefs-objects
-          hostPath:
-            path: /srv/k3s-data/gluster/mounts/gv0/juicefs-objects
-            type: DirectoryOrCreate
+            secretName: juicefs-sc-secret

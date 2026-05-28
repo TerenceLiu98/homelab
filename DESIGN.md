@@ -107,16 +107,16 @@ Host layout:
 - `/srv/k3s-data/local-path` for the k3s local-path provisioner.
 - `/srv/k3s-data/gluster/bricks/gv0` for the GlusterFS brick.
 - `/srv/k3s-data/gluster/mounts/gv0` for the mounted GlusterFS volume.
-- `/srv/k3s-data/gluster/mounts/gv0/juicefs-objects` for JuiceFS file-backed
-  object chunks.
 - `/srv/k3s-data/redis` for Valkey/Redis metadata persistence.
 - `/srv/k3s-data/backups` reserved for backups.
 
 JuiceFS uses:
 
-- Metadata: host Valkey/Redis at `10.42.0.1:6379`, database `1`.
-- Object storage: `file` storage under the GlusterFS mount.
-- Kubernetes access: `juicefs-rwx` StorageClass through JuiceFS CSI.
+- Metadata: host Valkey/Redis at `100.118.192.87:6379`, database `1`.
+- Object storage: JuiceFS `gluster` backend at
+  `100.118.192.87/storage/gluster`.
+- Kubernetes access: `juicefs-sc` StorageClass through JuiceFS CSI, with
+  dynamic PV paths rendered as `<namespace>/<pvc-name>`.
 
 This gives cluster workloads RWX PVCs without running MinIO or Redis inside the
 cluster.

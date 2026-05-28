@@ -16,7 +16,7 @@ See [DESIGN.md](DESIGN.md) for the architecture and operational model.
 - `/dev/sda` host storage mounted at `/srv/k3s-data`.
 - GlusterFS volume `gv0` as the local storage backend.
 - Host Valkey/Redis metadata for JuiceFS.
-- JuiceFS CSI `juicefs-rwx` StorageClass.
+- JuiceFS CSI `juicefs-sc` StorageClass.
 
 ## Repository Layout
 
