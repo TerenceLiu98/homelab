@@ -61,7 +61,7 @@ docs                             Operational notes
 3. Start the host Redis-compatible metadata service:
 
    ```sh
-   sudo scripts/prepare-host-redis.sh 10.42.0.1
+   sudo scripts/prepare-host-redis.sh 100.118.192.87
    ```
 
 4. Apply the source wildcard TLS Secret for Kyverno to clone:

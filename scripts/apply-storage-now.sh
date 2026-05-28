@@ -19,19 +19,20 @@ rand() {
 
 $KUBECTL create namespace storage --dry-run=client -o yaml | $KUBECTL apply -f -
 
-if ! $KUBECTL -n storage get secret juicefs-secret >/dev/null 2>&1; then
-  NODE_IP="10.42.0.1"
+if ! $KUBECTL -n kube-system get secret juicefs-sc-secret >/dev/null 2>&1; then
+  NODE_IP="$(ip -4 addr show tailscale0 2>/dev/null | awk '/ inet / { sub("/.*", "", $2); print $2; exit }')"
+  NODE_IP="${NODE_IP:-10.42.0.1}"
   if [ -f /etc/valkey/k3s-juicefs.pass ]; then
     REDIS_PASSWORD="$(cat /etc/valkey/k3s-juicefs.pass)"
   else
     REDIS_PASSWORD="$(rand)"
   fi
-  $KUBECTL -n storage create secret generic juicefs-secret \
-    --from-literal=name=k3s-jfs \
-    --from-literal=redis-password="$REDIS_PASSWORD" \
+  $KUBECTL -n kube-system create secret generic juicefs-sc-secret \
+    --from-literal=name=juicefs \
     --from-literal=metaurl="redis://:${REDIS_PASSWORD}@${NODE_IP}:6379/1" \
-    --from-literal=storage=file \
-    --from-literal=bucket=/srv/k3s-data/gluster/mounts/gv0/juicefs-objects
+    --from-literal=storage=gluster \
+    --from-literal=bucket="${NODE_IP}/storage/gluster" \
+    --from-literal='envs={JFS_DROP_OSCACHE: 1}'
 fi
 
 $KUBECTL apply -k platform/storage
