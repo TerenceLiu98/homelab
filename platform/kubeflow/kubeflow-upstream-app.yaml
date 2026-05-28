@@ -70,6 +70,35 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: kubeflow
+  ignoreDifferences:
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      jsonPointers:
+        - /spec
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      jsonPointers:
+        - /webhooks
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      jsonPointers:
+        - /webhooks
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+      jsonPointers:
+        - /rules
+    - group: apps
+      kind: Deployment
+      name: cluster-local-gateway
+      namespace: istio-system
+      jsonPointers:
+        - /spec
+    - group: apps
+      kind: Deployment
+      name: istio-ingressgateway
+      namespace: istio-system
+      jsonPointers:
+        - /spec
   syncPolicy:
     automated:
       prune: false
