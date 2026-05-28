@@ -37,6 +37,7 @@ spec:
           g, me@cklau.cc, role:admin
           g, TerenceLiu98, role:admin
         policy.default: role:readonly
+        scopes: '[groups, email, preferred_username]'
       params:
         server.insecure: true
     server:
