@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oauth2-proxy-global-dex-config
+  namespace: oauth2-proxy
+data:
+  oauth2_proxy.cfg: |-
+    provider = "oidc"
+    oidc_issuer_url = "https://auth.erotica.icu"
+    scope = "profile email groups openid"
+    email_domains = [ "*" ]
+
+    upstreams = [ "static://200" ]
+
+    api_routes = [
+      "/api/",
+      "/apis/",
+      "^/ml_metadata",
+    ]
+
+    skip_oidc_discovery = true
+    login_url = "https://auth.erotica.icu/auth"
+    redeem_url = "http://dex.identity.svc.cluster.local:5556/token"
+    oidc_jwks_url = "http://dex.identity.svc.cluster.local:5556/keys"
+
+    skip_provider_button = false
+    provider_display_name = "Dex"
+    custom_sign_in_logo = "/custom-theme/kubeflow-logo.svg"
+    banner = "-"
+    footer = "-"
+    prompt = "none"
+
+    set_authorization_header = true
+    set_xauthrequest = true
+
+    cookie_name = "oauth2_proxy_kubeflow"
+    cookie_expire = "24h"
+    cookie_refresh = 0
+
+    code_challenge_method = "S256"
+    redirect_url = "https://kubeflow.erotica.icu/oauth2/callback"

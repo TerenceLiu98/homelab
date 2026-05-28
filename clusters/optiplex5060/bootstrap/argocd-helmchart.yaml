@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: argocd
+  namespace: kube-system
+spec:
+  repo: https://argoproj.github.io/argo-helm
+  chart: argo-cd
+  targetNamespace: argocd
+  createNamespace: true
+  valuesContent: |-
+    global:
+      domain: argo.erotica.icu
+    crds:
+      install: true
+    configs:
+      cm:
+        url: https://argo.erotica.icu
+        application.resourceTrackingMethod: annotation
+        oidc.config: |
+          name: Dex
+          issuer: https://auth.erotica.icu
+          clientID: argo-cd
+          clientSecret: $oidc.dex.clientSecret
+          requestedScopes:
+            - openid
+            - profile
+            - email
+            - groups
+      rbac:
+        policy.csv: |
+          g, me@cklau.cc, role:admin
+          g, TerenceLiu98, role:admin
+        policy.default: role:readonly
+      params:
+        server.insecure: true
+    server:
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        hostname: argo.erotica.icu
+        tls: true
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+    controller:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+    repoServer:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+    redis:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi

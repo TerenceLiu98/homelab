@@ -1,2 +1,114 @@
-# homelab
-GitOps repository of my homelab services
+# Homelab k3s Platform
+
+This repository bootstraps and manages the `optiplex5060` k3s homelab platform.
+It includes Argo CD, global Dex authentication, Traefik ingress, GlusterFS-backed
+JuiceFS storage, and Kubeflow.
+
+See [DESIGN.md](DESIGN.md) for the architecture and operational model.
+
+## What Is Included
+
+- Argo CD GitOps root application.
+- k3s Traefik ingress for `auth`, `argo`, and `kubeflow` hostnames.
+- Global Dex in the `identity` namespace with local users and GitHub OAuth.
+- Kubeflow using the global Dex through `oauth2-proxy`.
+- `/dev/sda` host storage mounted at `/srv/k3s-data`.
+- GlusterFS volume `gv0` as the local storage backend.
+- Host Valkey/Redis metadata for JuiceFS.
+- JuiceFS CSI `juicefs-rwx` StorageClass.
+
+## Repository Layout
+
+```text
+clusters/optiplex5060/bootstrap  One-time Argo CD bootstrap manifests
+clusters/optiplex5060/apps       Argo CD root application children
+platform/auth                    Global Dex
+platform/ingress                 Edge ingress resources
+platform/storage                 JuiceFS CSI and StorageClass
+platform/kubeflow                Kubeflow upstream Application and auth patches
+scripts                          Host prep, rendering, and bootstrap scripts
+docs                             Operational notes
+```
+
+## Prerequisites
+
+- Arch Linux host with k3s installed.
+- `/dev/sda` available as disposable data disk.
+- DNS records for:
+  - `auth.<BASE_DOMAIN>`
+  - `argo.<BASE_DOMAIN>`
+  - `kubeflow.<BASE_DOMAIN>`
+- GitHub OAuth app:
+  - Homepage URL: `https://auth.<BASE_DOMAIN>`
+  - Authorization callback URL: `https://auth.<BASE_DOMAIN>/callback`
+
+## Quick Start
+
+1. Install host tools:
+
+   ```sh
+   scripts/install-host-tools-arch.sh
+   ```
+
+2. Prepare `/dev/sda` and GlusterFS:
+
+   ```sh
+   sudo scripts/prepare-host-storage.sh --device /dev/sda --yes
+   ```
+
+3. Start the host Redis-compatible metadata service:
+
+   ```sh
+   sudo scripts/prepare-host-redis.sh 10.42.0.1
+   ```
+
+4. Create `.env`:
+
+   ```sh
+   cp .env.example .env
+   ```
+
+   Fill the domain, GitOps repo, GitHub OAuth values, Dex local user hash, and
+   generated client/metadata secrets.
+
+5. Materialize placeholders before committing the GitOps repo:
+
+   ```sh
+   scripts/materialize-config.sh --in-place
+   ```
+
+6. Commit and push the repository to `GITOPS_REPO_URL`.
+
+7. Bootstrap Argo CD and the root app:
+
+   ```sh
+   scripts/bootstrap.sh
+   ```
+
+## Optional Storage Bootstrap
+
+If JuiceFS storage should be deployed before Argo CD has reconciled all apps:
+
+```sh
+sudo scripts/apply-storage-now.sh
+```
+
+## Verification
+
+```sh
+sudo k3s kubectl get nodes -o wide
+sudo k3s kubectl get pods -A
+sudo k3s kubectl get ingress -A
+sudo k3s kubectl get storageclass
+sudo k3s kubectl -n argocd get applications
+sudo k3s kubectl -n istio-system get requestauthentication dex-jwt -o yaml
+```
+
+The Kubeflow JWT issuer should be `https://auth.<BASE_DOMAIN>`, not the disabled
+Kubeflow internal Dex service.
+
+## Secret Policy
+
+Do not commit `.env` or `rendered/`. They contain OAuth credentials, Dex config,
+JuiceFS metadata credentials, and generated Kubernetes Secrets.
+

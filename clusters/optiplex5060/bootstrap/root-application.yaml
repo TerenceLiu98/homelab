@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: optiplex5060-root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/TerenceLiu98/homelab.git
+    targetRevision: experimental
+    path: clusters/optiplex5060/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+

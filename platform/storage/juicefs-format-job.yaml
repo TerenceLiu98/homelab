@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: juicefs-format
+  namespace: storage
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: juicefs
+          image: juicedata/juicefs-csi-driver:v0.25.1
+          command:
+            - sh
+            - -ec
+            - |
+              METAURL="$(cat /etc/juicefs/metaurl)"
+              NAME="$(cat /etc/juicefs/name)"
+              if juicefs status "$METAURL" >/dev/null 2>&1; then
+                echo "JuiceFS volume already formatted"
+                exit 0
+              fi
+              juicefs format \
+                --storage "$(cat /etc/juicefs/storage)" \
+                --bucket "$(cat /etc/juicefs/bucket)" \
+                "$METAURL" "$NAME"
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: juicefs-secret
+              mountPath: /etc/juicefs
+              readOnly: true
+            - name: juicefs-objects
+              mountPath: /srv/k3s-data/gluster/mounts/gv0/juicefs-objects
+      volumes:
+        - name: juicefs-secret
+          secret:
+            secretName: juicefs-secret
+        - name: juicefs-objects
+          hostPath:
+            path: /srv/k3s-data/gluster/mounts/gv0/juicefs-objects
+            type: DirectoryOrCreate

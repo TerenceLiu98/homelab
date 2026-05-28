@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform-auth
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/TerenceLiu98/homelab.git
+    targetRevision: experimental
+    path: platform/auth
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: identity
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

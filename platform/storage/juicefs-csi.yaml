@@ -1,0 +1,16 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: juicefs-csi-driver
+  namespace: kube-system
+spec:
+  repo: https://juicedata.github.io/charts/
+  chart: juicefs-csi-driver
+  targetNamespace: kube-system
+  valuesContent: |-
+    controller:
+      replicas: 1
+    node:
+      tolerations:
+        - operator: Exists
+
