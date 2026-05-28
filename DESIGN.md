@@ -12,6 +12,7 @@ Primary goals:
 - GitOps-managed cluster add-ons and Kubeflow configuration.
 - Local disk backed storage on `/dev/sda`.
 - RWX persistent volumes through JuiceFS CSI.
+- Automatic TLS Secret fan-out for Ingress namespaces.
 - Minimal secret material in Git; generated secrets stay local.
 
 ## Topology
@@ -37,6 +38,7 @@ k3s cluster
     +-- argocd             GitOps controller
     +-- identity           global Dex identity provider
     +-- storage            JuiceFS CSI and format job
+    +-- kyverno            policy automation and TLS Secret sync
     +-- oauth2-proxy       Kubeflow OIDC gateway
     +-- istio-system       Kubeflow ingress and JWT validation
     +-- kubeflow           Kubeflow applications
@@ -54,6 +56,8 @@ k3s cluster
 applications:
 
 - `storage.yaml`
+- `kyverno.yaml`
+- `kyverno-policies.yaml`
 - `auth.yaml`
 - `ingress.yaml`
 - `kubeflow.yaml`
@@ -129,6 +133,30 @@ the platform hostnames and forwards:
 Kubeflow still uses Istio internally because the upstream manifests expect it.
 Traefik is only the edge entrypoint.
 
+All public Ingress resources use the same TLS Secret name:
+`erotica-icu-tls`.
+
+The source TLS Secret is stored in the `kyverno` namespace and created from the
+host ACME files:
+
+- `/home/terenceliu/acme/ssl/erotica.icu.full.pem`
+- `/home/terenceliu/acme/ssl/erotica.icu.key`
+
+`scripts/apply-erotica-tls-source.sh` creates or updates
+`kyverno/erotica-icu-tls`. Kyverno then clones that Secret into every namespace
+that has an Ingress, currently:
+
+- `argocd`
+- `identity`
+- `istio-system`
+
+The Kyverno policy uses `synchronize: true`, so renewing the source Secret will
+propagate the certificate to the generated namespace copies.
+
+Secret write permissions are scoped to the current Ingress namespaces instead
+of cluster-wide. When a new public Ingress namespace is added, add the namespace
+to `platform/kyverno-policies/tls-secret-sync.yaml`.
+
 ## Kubeflow
 
 Kubeflow is installed from `kubeflow/manifests` at `v1.11.0`, path `example`.
@@ -148,12 +176,13 @@ related components.
 1. Install host packages with `scripts/install-host-tools-arch.sh`.
 2. Prepare `/dev/sda` and GlusterFS with `scripts/prepare-host-storage.sh`.
 3. Start host Valkey/Redis metadata with `scripts/prepare-host-redis.sh`.
-4. Fill `.env` from `.env.example`.
-5. Render and apply storage secrets if storage is needed before Argo CD:
+4. Apply the source TLS Secret with `scripts/apply-erotica-tls-source.sh`.
+5. Fill `.env` from `.env.example`.
+6. Render and apply storage secrets if storage is needed before Argo CD:
    `scripts/apply-storage-now.sh`.
-6. Materialize placeholders with `scripts/materialize-config.sh --in-place`.
-7. Commit and push the repo to `GITOPS_REPO_URL`.
-8. Bootstrap Argo CD with `scripts/bootstrap.sh`.
+7. Materialize placeholders with `scripts/materialize-config.sh --in-place`.
+8. Commit and push the repo to `GITOPS_REPO_URL`.
+9. Bootstrap Argo CD with `scripts/bootstrap.sh`.
 
 ## Secret Handling
 
@@ -165,4 +194,3 @@ inputs. The generated manifests contain:
 - JuiceFS metadata password and Redis URL.
 
 Do not commit generated secret manifests.
-

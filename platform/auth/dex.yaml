@@ -95,7 +95,7 @@ spec:
   tls:
     - hosts:
         - auth.erotica.icu
-      secretName: dex-tls
+      secretName: erotica-icu-tls
   rules:
     - host: auth.erotica.icu
       http:

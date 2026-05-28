@@ -8,7 +8,7 @@ spec:
   tls:
     - hosts:
         - kubeflow.erotica.icu
-      secretName: kubeflow-tls
+      secretName: erotica-icu-tls
   rules:
     - host: kubeflow.erotica.icu
       http:
@@ -20,4 +20,3 @@ spec:
                 name: istio-ingressgateway
                 port:
                   number: 80
-

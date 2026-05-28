@@ -44,7 +44,11 @@ spec:
         enabled: true
         ingressClassName: traefik
         hostname: argo.erotica.icu
-        tls: true
+        tls: false
+        extraTls:
+          - hosts:
+              - argo.erotica.icu
+            secretName: erotica-icu-tls
       resources:
         requests:
           cpu: 100m

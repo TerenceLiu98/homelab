@@ -2,7 +2,7 @@
 
 This repository bootstraps and manages the `optiplex5060` k3s homelab platform.
 It includes Argo CD, global Dex authentication, Traefik ingress, GlusterFS-backed
-JuiceFS storage, and Kubeflow.
+JuiceFS storage, Kyverno policy automation, and Kubeflow.
 
 See [DESIGN.md](DESIGN.md) for the architecture and operational model.
 
@@ -11,6 +11,7 @@ See [DESIGN.md](DESIGN.md) for the architecture and operational model.
 - Argo CD GitOps root application.
 - k3s Traefik ingress for `auth`, `argo`, and `kubeflow` hostnames.
 - Global Dex in the `identity` namespace with local users and GitHub OAuth.
+- Kyverno syncing the wildcard TLS Secret to Ingress namespaces.
 - Kubeflow using the global Dex through `oauth2-proxy`.
 - `/dev/sda` host storage mounted at `/srv/k3s-data`.
 - GlusterFS volume `gv0` as the local storage backend.
@@ -25,6 +26,7 @@ clusters/optiplex5060/apps       Argo CD root application children
 platform/auth                    Global Dex
 platform/ingress                 Edge ingress resources
 platform/storage                 JuiceFS CSI and StorageClass
+platform/kyverno-policies        TLS Secret sync policy
 platform/kubeflow                Kubeflow upstream Application and auth patches
 scripts                          Host prep, rendering, and bootstrap scripts
 docs                             Operational notes
@@ -62,7 +64,18 @@ docs                             Operational notes
    sudo scripts/prepare-host-redis.sh 10.42.0.1
    ```
 
-4. Create `.env`:
+4. Apply the source wildcard TLS Secret for Kyverno to clone:
+
+   ```sh
+   scripts/apply-erotica-tls-source.sh
+   ```
+
+   By default this reads:
+
+   - `/home/terenceliu/acme/ssl/erotica.icu.full.pem`
+   - `/home/terenceliu/acme/ssl/erotica.icu.key`
+
+5. Create `.env`:
 
    ```sh
    cp .env.example .env
@@ -71,15 +84,15 @@ docs                             Operational notes
    Fill the domain, GitOps repo, GitHub OAuth values, Dex local user hash, and
    generated client/metadata secrets.
 
-5. Materialize placeholders before committing the GitOps repo:
+6. Materialize placeholders before committing the GitOps repo:
 
    ```sh
    scripts/materialize-config.sh --in-place
    ```
 
-6. Commit and push the repository to `GITOPS_REPO_URL`.
+7. Commit and push the repository to `GITOPS_REPO_URL`.
 
-7. Bootstrap Argo CD and the root app:
+8. Bootstrap Argo CD and the root app:
 
    ```sh
    scripts/bootstrap.sh
@@ -101,6 +114,7 @@ sudo k3s kubectl get pods -A
 sudo k3s kubectl get ingress -A
 sudo k3s kubectl get storageclass
 sudo k3s kubectl -n argocd get applications
+sudo k3s kubectl get secret -A | grep erotica-icu-tls
 sudo k3s kubectl -n istio-system get requestauthentication dex-jwt -o yaml
 ```
 
@@ -111,4 +125,3 @@ Kubeflow internal Dex service.
 
 Do not commit `.env` or `rendered/`. They contain OAuth credentials, Dex config,
 JuiceFS metadata credentials, and generated Kubernetes Secrets.
-

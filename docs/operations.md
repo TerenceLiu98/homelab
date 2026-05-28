@@ -23,9 +23,21 @@ Create DNS records pointing to the Tailscale IP `100.118.192.87`:
 sudo k3s kubectl get nodes -o wide
 sudo k3s kubectl get pods -A
 sudo k3s kubectl get ingress -A
+sudo k3s kubectl get secret -A | grep erotica-icu-tls
 sudo k3s kubectl get storageclass
 sudo k3s kubectl -n argocd get applications
 ```
+
+## TLS Secret renewal
+
+After renewing the ACME certificate, update the source Secret:
+
+```sh
+scripts/apply-erotica-tls-source.sh
+```
+
+Kyverno synchronizes `kyverno/erotica-icu-tls` into the namespaces that own
+Ingress resources.
 
 ## Storage smoke test
 
