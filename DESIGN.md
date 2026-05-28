@@ -166,6 +166,8 @@ The Argo CD Application applies kustomize patches for this cluster:
 - Scale down Kubeflow's bundled Dex.
 - Point `oauth2-proxy` at the global Dex Secret and ConfigMap.
 - Patch Istio `RequestAuthentication` to trust the global Dex issuer.
+- Disable mTLS in Kubeflow namespace `DestinationRule` resources because the
+  upstream workloads are currently running without Istio sidecars.
 
 Kubeflow on k3s is treated as a pragmatic homelab deployment. Upstream manifests
 install Istio, Knative, KServe, Katib, Pipelines, Spark, Training Operator, and

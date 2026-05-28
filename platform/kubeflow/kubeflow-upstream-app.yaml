@@ -59,6 +59,14 @@ spec:
             - op: add
               path: /spec/jwtRules/0/jwksUri
               value: http://dex.identity.svc.cluster.local:5556/keys
+        - target:
+            group: networking.istio.io
+            kind: DestinationRule
+            namespace: kubeflow
+          patch: |-
+            - op: replace
+              path: /spec/trafficPolicy/tls/mode
+              value: DISABLE
   destination:
     server: https://kubernetes.default.svc
     namespace: kubeflow
