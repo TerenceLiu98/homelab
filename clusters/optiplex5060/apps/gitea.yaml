@@ -45,6 +45,7 @@ spec:
         persistence:
           enabled: true
           create: true
+          claimName: gitea-shared-storage-v2
           storageClass: juicefs-sc
           size: 50Gi
           accessModes:
@@ -129,7 +130,7 @@ spec:
     namespace: gitea
   syncPolicy:
     automated:
-      prune: true
+      prune: false
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
