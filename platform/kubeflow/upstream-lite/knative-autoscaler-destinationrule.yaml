@@ -1,0 +1,10 @@
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: autoscaler
+  namespace: knative-serving
+spec:
+  host: autoscaler.knative-serving.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
