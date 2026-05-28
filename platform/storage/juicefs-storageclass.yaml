@@ -12,4 +12,6 @@ parameters:
   csi.storage.k8s.io/node-publish-secret-name: juicefs-sc-secret
   csi.storage.k8s.io/node-publish-secret-namespace: kube-system
   juicefs/clean-cache: "true"
+  juicefs/mount-cpu-request: 50m
+  juicefs/mount-memory-request: 256Mi
   pathPattern: "${.PVC.namespace}/${.PVC.name}"
