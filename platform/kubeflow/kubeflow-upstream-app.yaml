@@ -61,6 +61,58 @@ spec:
               path: /spec/jwtRules/0/jwksUri
               value: http://dex.identity.svc.cluster.local:5556/keys
         - target:
+            group: apps
+            version: v1
+            kind: Deployment
+            name: istiod
+            namespace: istio-system
+          patch: |-
+            - op: replace
+              path: /spec/template/spec/containers/0/resources/requests/cpu
+              value: 25m
+            - op: replace
+              path: /spec/template/spec/containers/0/resources/requests/memory
+              value: 512Mi
+        - target:
+            group: apps
+            version: v1
+            kind: Deployment
+            name: istio-ingressgateway
+            namespace: istio-system
+          patch: |-
+            - op: replace
+              path: /spec/template/spec/containers/0/resources/requests/cpu
+              value: 25m
+            - op: replace
+              path: /spec/template/spec/containers/0/resources/requests/memory
+              value: 96Mi
+        - target:
+            group: apps
+            version: v1
+            kind: Deployment
+            name: cluster-local-gateway
+            namespace: istio-system
+          patch: |-
+            - op: replace
+              path: /spec/template/spec/containers/0/resources/requests/cpu
+              value: 25m
+            - op: replace
+              path: /spec/template/spec/containers/0/resources/requests/memory
+              value: 96Mi
+        - target:
+            group: apps
+            version: v1
+            kind: Deployment
+            name: activator
+            namespace: knative-serving
+          patch: |-
+            - op: replace
+              path: /spec/template/spec/containers/0/resources/requests/cpu
+              value: 50m
+            - op: replace
+              path: /spec/template/spec/containers/0/resources/requests/memory
+              value: 96Mi
+        - target:
             version: v1
             kind: ConfigMap
             name: centraldashboard-parameters
