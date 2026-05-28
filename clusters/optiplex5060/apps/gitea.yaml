@@ -52,7 +52,7 @@ spec:
 
         resources:
           requests:
-            cpu: 100m
+            cpu: 50m
             memory: 512Mi
           limits:
             memory: 2Gi
@@ -60,7 +60,7 @@ spec:
         initContainers:
           resources:
             requests:
-              cpu: 25m
+              cpu: 10m
               memory: 128Mi
 
         deployment:
@@ -117,8 +117,8 @@ spec:
               size: 10Gi
             resources:
               requests:
-                cpu: 100m
-                memory: 256Mi
+                cpu: 25m
+                memory: 128Mi
               limits:
                 memory: 1Gi
 
