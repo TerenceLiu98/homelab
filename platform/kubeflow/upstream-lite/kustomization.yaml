@@ -46,7 +46,6 @@ resources:
   - https://github.com/kubeflow/manifests//applications/profiles/pss?ref=v1.11.0
   - https://github.com/kubeflow/manifests//applications/pvcviewer-controller/upstream/base?ref=v1.11.0
   - https://github.com/kubeflow/manifests//applications/volumes-web-app/upstream/overlays/istio?ref=v1.11.0
-  - https://github.com/kubeflow/manifests//common/user-namespace/base?ref=v1.11.0
 
 components:
   - https://github.com/kubeflow/manifests//common/security/PSS/dynamic/baseline?ref=v1.11.0
