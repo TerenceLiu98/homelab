@@ -159,7 +159,13 @@ to `platform/kyverno-policies/tls-secret-sync.yaml`.
 
 ## Kubeflow
 
-Kubeflow is installed from `kubeflow/manifests` at `v1.11.0`, path `example`.
+Kubeflow is installed through a local lite overlay at
+`platform/kubeflow/upstream-lite`. The overlay references only the
+`kubeflow/manifests` v1.11.0 components required for authentication, Profiles,
+Central Dashboard, Notebook Controller, Jupyter Web App, Volumes Web App, and
+PVC viewer. Katib, KServe, Pipelines, Spark, and Trainer are intentionally not
+included.
+
 The Argo CD Application applies kustomize patches for this cluster:
 
 - Delete the upstream example `Profile` and enable Central Dashboard
@@ -172,9 +178,8 @@ The Argo CD Application applies kustomize patches for this cluster:
   `AuthorizationPolicy` checks the ingressgateway source principal before the
   request reaches the Jupyter backend.
 
-Kubeflow on k3s is treated as a pragmatic homelab deployment. Upstream manifests
-install Istio, Knative, KServe, Katib, Pipelines, Spark, Training Operator, and
-related components.
+Kubeflow on k3s is treated as a pragmatic homelab deployment focused on
+interactive notebooks rather than the full MLOps stack.
 
 ## Bootstrap Flow
 

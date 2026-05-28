@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/kubeflow/manifests.git
-    targetRevision: v1.11.0
-    path: example
+    repoURL: https://github.com/TerenceLiu98/homelab.git
+    targetRevision: experimental
+    path: platform/kubeflow/upstream-lite
     kustomize:
       patches:
         - target:
@@ -465,7 +465,7 @@ spec:
         - /spec
   syncPolicy:
     automated:
-      prune: false
+      prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
