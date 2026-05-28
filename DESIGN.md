@@ -162,7 +162,9 @@ to `platform/kyverno-policies/tls-secret-sync.yaml`.
 Kubeflow is installed from `kubeflow/manifests` at `v1.11.0`, path `example`.
 The Argo CD Application applies kustomize patches for this cluster:
 
-- Set the default profile owner.
+- Delete the upstream example `Profile` and enable Central Dashboard
+  registration flow, so user Profiles are created through Kubeflow after login
+  instead of being managed as fixed GitOps objects.
 - Scale down Kubeflow's bundled Dex.
 - Point `oauth2-proxy` at the global Dex Secret and ConfigMap.
 - Patch Istio `RequestAuthentication` to trust the global Dex issuer.

@@ -121,6 +121,10 @@ sudo k3s kubectl -n istio-system get requestauthentication dex-jwt -o yaml
 The Kubeflow JWT issuer should be `https://auth.<BASE_DOMAIN>`, not the disabled
 Kubeflow internal Dex service.
 
+Kubeflow user Profiles are not pre-created in Git. Central Dashboard
+registration flow is enabled, and users create their Profile/workspace from the
+Kubeflow UI after authenticating through the global Dex.
+
 ## Secret Policy
 
 Do not commit `.env` or `rendered/`. They contain OAuth credentials, Dex config,
