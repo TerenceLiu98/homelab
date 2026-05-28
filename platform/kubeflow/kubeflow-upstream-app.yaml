@@ -103,10 +103,11 @@ spec:
             group: networking.istio.io
             kind: DestinationRule
             namespace: kubeflow
+            name: jupyter-web-app
           patch: |-
             - op: replace
               path: /spec/trafficPolicy/tls/mode
-              value: DISABLE
+              value: ISTIO_MUTUAL
         - target:
             version: v1
             kind: ConfigMap
