@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jupyter-web-app-namespace-authz-patch
+  namespace: kubeflow
+data:
+  namespace.py: |
+    from .. import authz
+    from . import v1_core
+
+
+    @authz.needs_authorization("list", "", "v1", "namespaces")
+    def list_namespaces():
+        return v1_core.list_namespace()

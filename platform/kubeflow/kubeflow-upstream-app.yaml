@@ -60,6 +60,26 @@ spec:
               path: /spec/jwtRules/0/jwksUri
               value: http://dex.identity.svc.cluster.local:5556/keys
         - target:
+            group: apps
+            version: v1
+            kind: Deployment
+            name: jupyter-web-app-deployment
+            namespace: kubeflow
+          patch: |-
+            - op: add
+              path: /spec/template/spec/containers/0/volumeMounts/-
+              value:
+                name: jupyter-web-app-namespace-authz-patch
+                mountPath: /usr/local/lib/python3.10/site-packages/kubeflow/kubeflow/crud_backend/api/namespace.py
+                subPath: namespace.py
+                readOnly: true
+            - op: add
+              path: /spec/template/spec/volumes/-
+              value:
+                name: jupyter-web-app-namespace-authz-patch
+                configMap:
+                  name: jupyter-web-app-namespace-authz-patch
+        - target:
             group: networking.istio.io
             kind: DestinationRule
             namespace: kubeflow

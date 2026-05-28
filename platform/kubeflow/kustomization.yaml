@@ -1,6 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - jupyter-web-app-namespace-authz-patch.yaml
   - oauth2-proxy-global-dex-config.yaml
   - storageclass-rbac.yaml
   - notebook-ui-cluster-reader-rbac.yaml

@@ -40,3 +40,6 @@ subjects:
   - apiGroup: rbac.authorization.k8s.io
     kind: User
     name: me@cklau.cc
+  - kind: ServiceAccount
+    name: jupyter-web-app-service-account
+    namespace: kubeflow
