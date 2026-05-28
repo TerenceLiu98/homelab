@@ -6,4 +6,6 @@ resources:
   - storage.yaml
   - auth.yaml
   - ingress.yaml
+  - gitea.yaml
+  - gitea-actions.yaml
   - kubeflow.yaml

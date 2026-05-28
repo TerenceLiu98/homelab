@@ -1,0 +1,136 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform-gitea
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://dl.gitea.com/charts/
+    chart: gitea
+    targetRevision: 12.6.0
+    helm:
+      releaseName: gitea
+      values: |
+        namespace: gitea
+        replicaCount: 1
+
+        global:
+          storageClass: juicefs-sc
+
+        image:
+          rootless: true
+
+        service:
+          http:
+            type: ClusterIP
+            port: 3000
+            clusterIP: ""
+          ssh:
+            type: ClusterIP
+            clusterIP: ""
+
+        ingress:
+          enabled: true
+          className: traefik
+          hosts:
+            - host: git.erotica.icu
+              paths:
+                - path: /
+          tls:
+            - secretName: erotica-icu-tls
+              hosts:
+                - git.erotica.icu
+
+        persistence:
+          enabled: true
+          create: true
+          storageClass: juicefs-sc
+          size: 50Gi
+          accessModes:
+            - ReadWriteOnce
+
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            memory: 2Gi
+
+        initContainers:
+          resources:
+            requests:
+              cpu: 25m
+              memory: 128Mi
+
+        deployment:
+          env:
+            - name: GITEA_RUNNER_REGISTRATION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: gitea-actions-token
+                  key: token
+
+        gitea:
+          admin:
+            existingSecret: gitea-admin
+            email: admin@erotica.icu
+            passwordMode: initialOnlyNoReset
+          oauth:
+            - name: dex
+              provider: openidConnect
+              existingSecret: gitea-oauth-dex
+              autoDiscoverUrl: https://auth.erotica.icu/.well-known/openid-configuration
+              scopes: openid email profile
+          config:
+            APP_NAME: Homelab Gitea
+            server:
+              DOMAIN: git.erotica.icu
+              ROOT_URL: https://git.erotica.icu/
+              PROTOCOL: http
+              HTTP_PORT: 3000
+              DISABLE_SSH: true
+            service:
+              REQUIRE_SIGNIN_VIEW: false
+              DISABLE_REGISTRATION: false
+              ALLOW_ONLY_EXTERNAL_REGISTRATION: false
+              SHOW_REGISTRATION_BUTTON: false
+            actions:
+              ENABLED: true
+
+        valkey-cluster:
+          enabled: false
+        valkey:
+          enabled: false
+        postgresql-ha:
+          enabled: false
+        postgresql:
+          enabled: true
+          global:
+            postgresql:
+              auth:
+                database: gitea
+                username: gitea
+                password: gitea
+          primary:
+            persistence:
+              size: 10Gi
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+
+        test:
+          enabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gitea
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

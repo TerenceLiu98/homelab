@@ -25,6 +25,7 @@ Traefik ingress from k3s
     |
     +-- auth.<domain>      -> identity/dex
     +-- argo.<domain>      -> argocd/argocd-server
+    +-- git.<domain>       -> gitea/gitea-http
     +-- kubeflow.<domain>  -> istio-system/istio-ingressgateway
 
 Host services
@@ -39,6 +40,7 @@ k3s cluster
     +-- identity           global Dex identity provider
     +-- storage            JuiceFS CSI and format job
     +-- kyverno            policy automation and TLS Secret sync
+    +-- gitea              Git hosting and Gitea Actions runner
     +-- oauth2-proxy       Kubeflow OIDC gateway
     +-- istio-system       Kubeflow ingress and JWT validation
     +-- kubeflow           Kubeflow applications
@@ -60,6 +62,8 @@ applications:
 - `kyverno-policies.yaml`
 - `auth.yaml`
 - `ingress.yaml`
+- `gitea.yaml`
+- `gitea-actions.yaml`
 - `kubeflow.yaml`
 
 Each app points at a folder under `platform/`.
@@ -71,6 +75,7 @@ Dex is the identity provider for:
 
 - Argo CD, using client ID `argo-cd`.
 - Kubeflow, using client ID `kubeflow-oidc`.
+- Gitea, using client ID `gitea`.
 - Future applications, by adding another Dex static client and configuring the
   application to use `https://auth.<domain>`.
 
@@ -147,6 +152,7 @@ host ACME files:
 that has an Ingress, currently:
 
 - `argocd`
+- `gitea`
 - `identity`
 - `istio-system`
 
@@ -181,6 +187,31 @@ The Argo CD Application applies kustomize patches for this cluster:
 Kubeflow on k3s is treated as a pragmatic homelab deployment focused on
 interactive notebooks rather than the full MLOps stack.
 
+## Gitea And Actions
+
+Gitea is installed by Argo CD from the official `gitea` Helm chart and exposed
+at `git.<domain>` through Traefik. It stores repository data on a `juicefs-sc`
+PVC and uses the chart's standalone PostgreSQL dependency for metadata.
+
+Gitea login is configured as an OpenID Connect source named `dex`. The Dex
+static client has:
+
+- Client ID: `gitea`
+- Redirect URI: `https://git.<domain>/user/oauth2/dex/callback`
+
+Gitea Actions is installed by Argo CD from the official `actions` Helm chart in
+the same namespace. The runner connects to the in-cluster Gitea service at
+`http://gitea-http.gitea.svc.cluster.local:3000` and uses the generated
+`gitea-actions-token` Secret as its registration token. The runner includes a
+privileged Docker-in-Docker sidecar, so it should be treated as trusted
+homelab-only CI capacity rather than a public shared runner.
+
+Generated Gitea secrets are rendered from `.env` by `scripts/render-secrets.sh`:
+
+- `gitea-admin`
+- `gitea-oauth-dex`
+- `gitea-actions-token`
+
 ## Bootstrap Flow
 
 1. Install host packages with `scripts/install-host-tools-arch.sh`.
@@ -200,6 +231,7 @@ interactive notebooks rather than the full MLOps stack.
 inputs. The generated manifests contain:
 
 - Dex config and OAuth client secrets.
+- Gitea admin, OIDC client, and Actions runner token secrets.
 - Kubeflow oauth2-proxy client secret.
 - JuiceFS metadata password and Redis URL.
 

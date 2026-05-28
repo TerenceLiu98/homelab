@@ -2,7 +2,7 @@
 
 This repository bootstraps and manages the `optiplex5060` k3s homelab platform.
 It includes Argo CD, global Dex authentication, Traefik ingress, GlusterFS-backed
-JuiceFS storage, Kyverno policy automation, and Kubeflow.
+JuiceFS storage, Kyverno policy automation, Gitea with Actions, and Kubeflow.
 
 See [DESIGN.md](DESIGN.md) for the architecture and operational model.
 
@@ -13,6 +13,8 @@ See [DESIGN.md](DESIGN.md) for the architecture and operational model.
 - Global Dex in the `identity` namespace with local users and GitHub OAuth.
 - Kyverno syncing the wildcard TLS Secret to Ingress namespaces.
 - Kubeflow using the global Dex through `oauth2-proxy`.
+- Gitea using the global Dex as an OpenID Connect login source.
+- Gitea Actions runner with Docker-in-Docker for CI jobs.
 - `/dev/sda` host storage mounted at `/srv/k3s-data`.
 - GlusterFS volume `gv0` as the local storage backend.
 - Host Valkey/Redis metadata for JuiceFS.
@@ -28,6 +30,7 @@ platform/ingress                 Edge ingress resources
 platform/storage                 JuiceFS CSI and StorageClass
 platform/kyverno-policies        TLS Secret sync policy
 platform/kubeflow                Kubeflow upstream Application and auth patches
+clusters/optiplex5060/apps       Includes Gitea and Gitea Actions Helm apps
 scripts                          Host prep, rendering, and bootstrap scripts
 docs                             Operational notes
 ```
@@ -39,6 +42,7 @@ docs                             Operational notes
 - DNS records for:
   - `auth.<BASE_DOMAIN>`
   - `argo.<BASE_DOMAIN>`
+  - `git.<BASE_DOMAIN>`
   - `kubeflow.<BASE_DOMAIN>`
 - GitHub OAuth app:
   - Homepage URL: `https://auth.<BASE_DOMAIN>`
@@ -81,8 +85,9 @@ docs                             Operational notes
    cp .env.example .env
    ```
 
-   Fill the domain, GitOps repo, GitHub OAuth values, Dex local user hash, and
-   generated client/metadata secrets.
+   Fill the domain, GitOps repo, GitHub OAuth values, Dex local user hash,
+   Gitea admin password, Gitea OIDC secret, Gitea runner token, and generated
+   client/metadata secrets.
 
 6. Materialize placeholders before committing the GitOps repo:
 
@@ -114,6 +119,7 @@ sudo k3s kubectl get pods -A
 sudo k3s kubectl get ingress -A
 sudo k3s kubectl get storageclass
 sudo k3s kubectl -n argocd get applications
+sudo k3s kubectl -n gitea get pods,ingress,pvc
 sudo k3s kubectl get secret -A | grep erotica-icu-tls
 sudo k3s kubectl -n istio-system get requestauthentication dex-jwt -o yaml
 ```
@@ -124,6 +130,9 @@ Kubeflow internal Dex service.
 Kubeflow user Profiles are not pre-created in Git. Central Dashboard
 registration flow is enabled, and users create their Profile/workspace from the
 Kubeflow UI after authenticating through the global Dex.
+
+Gitea is available at `https://git.<BASE_DOMAIN>`. The Dex callback URL rendered
+for Gitea is `https://git.<BASE_DOMAIN>/user/oauth2/dex/callback`.
 
 ## Secret Policy
 

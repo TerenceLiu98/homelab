@@ -18,6 +18,10 @@ require_env \
   GITHUB_ALLOWED_EMAIL \
   ARGO_DEX_CLIENT_SECRET \
   KUBEFLOW_OIDC_CLIENT_SECRET \
+  GITEA_OIDC_CLIENT_SECRET \
+  GITEA_ADMIN_USERNAME \
+  GITEA_ADMIN_PASSWORD \
+  GITEA_RUNNER_REGISTRATION_TOKEN \
   DEX_LOCAL_ADMIN_EMAIL \
   DEX_LOCAL_ADMIN_USERNAME \
   DEX_LOCAL_ADMIN_BCRYPT_HASH \
@@ -42,6 +46,11 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
+  name: gitea
+---
+apiVersion: v1
+kind: Namespace
+metadata:
   name: oauth2-proxy
 ---
 apiVersion: v1
@@ -55,6 +64,7 @@ stringData:
   github-client-secret: "${GITHUB_CLIENT_SECRET}"
   argo-client-secret: "${ARGO_DEX_CLIENT_SECRET}"
   kubeflow-client-secret: "${KUBEFLOW_OIDC_CLIENT_SECRET}"
+  gitea-client-secret: "${GITEA_OIDC_CLIENT_SECRET}"
   local-admin-bcrypt-hash: "${DEX_LOCAL_ADMIN_BCRYPT_HASH}"
 ---
 apiVersion: v1
@@ -91,6 +101,11 @@ stringData:
         secret: "${KUBEFLOW_OIDC_CLIENT_SECRET}"
         redirectURIs:
           - https://kubeflow.${BASE_DOMAIN}/oauth2/callback
+      - id: gitea
+        name: Gitea
+        secret: "${GITEA_OIDC_CLIENT_SECRET}"
+        redirectURIs:
+          - https://git.${BASE_DOMAIN}/user/oauth2/dex/callback
     connectors:
       - type: github
         id: github
@@ -120,6 +135,35 @@ type: Opaque
 stringData:
   client-id: "kubeflow-oidc"
   client-secret: "${KUBEFLOW_OIDC_CLIENT_SECRET}"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gitea-admin
+  namespace: gitea
+type: Opaque
+stringData:
+  username: "${GITEA_ADMIN_USERNAME}"
+  password: "${GITEA_ADMIN_PASSWORD}"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gitea-oauth-dex
+  namespace: gitea
+type: Opaque
+stringData:
+  key: "gitea"
+  secret: "${GITEA_OIDC_CLIENT_SECRET}"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gitea-actions-token
+  namespace: gitea
+type: Opaque
+stringData:
+  token: "${GITEA_RUNNER_REGISTRATION_TOKEN}"
 ---
 apiVersion: v1
 kind: Secret
