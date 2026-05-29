@@ -337,12 +337,12 @@ spec:
                           # "{notebook-name}" is replaced with the Notebook name
                           name: "{notebook-name}-workspace"
                         spec:
-                          storageClassName: juicefs-sc
+                          storageClassName: notebook-local
                           resources:
                             requests:
                               storage: 5Gi
                           accessModes:
-                          - ReadWriteMany
+                          - ReadWriteOnce
 
                   ################################################################
                   # Data Volumes
