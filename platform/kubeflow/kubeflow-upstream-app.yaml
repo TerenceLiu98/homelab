@@ -373,15 +373,26 @@ spec:
                   # Affinity
                   ################################################################
                   affinityConfig:
-                    readOnly: false
+                    readOnly: true
 
                     # the `configKey` of the default affinity config
                     # (to have no default, set as "")
                     # (if `readOnly`, the default `value` will be the only accessible option)
-                    value: ""
+                    value: "kubeflow_compute"
 
                     # the list of available affinity configs in the dropdown
-                    options: []
+                    options:
+                      - configKey: "kubeflow_compute"
+                        displayName: "Kubeflow Compute Nodes"
+                        affinity:
+                          nodeAffinity:
+                            requiredDuringSchedulingIgnoredDuringExecution:
+                              nodeSelectorTerms:
+                                - matchExpressions:
+                                    - key: "kubeflow-compute"
+                                      operator: "In"
+                                      values:
+                                        - "true"
                     #options:
                     #  - configKey: "dedicated_node_per_notebook"
                     #    displayName: "Dedicated Node Per Notebook"
