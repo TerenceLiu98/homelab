@@ -323,7 +323,7 @@ spec:
                   # Workspace Volumes
                   ################################################################
                   workspaceVolume:
-                    readOnly: false
+                    readOnly: true
 
                     # the default workspace volume to be created and mounted
                     # (to have no default, set `value: null`)
