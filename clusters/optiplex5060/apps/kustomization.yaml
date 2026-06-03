@@ -9,3 +9,4 @@ resources:
   - gitea.yaml
   - gitea-actions.yaml
   - kubeflow.yaml
+  - socks5.yaml

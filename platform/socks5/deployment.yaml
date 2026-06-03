@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gost-socks5
+  namespace: socks5
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gost-socks5
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gost-socks5
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: optiplex5060
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: gost
+          image: ginuerzh/gost:latest
+          command:
+            - gost
+          args:
+            - -L
+            - socks5://:8081
+          ports:
+            - name: socks5
+              containerPort: 8081
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
