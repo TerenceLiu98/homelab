@@ -12,14 +12,12 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: gost-socks5
-  spec:
+    spec:
       nodeSelector:
         kubernetes.io/hostname: optiplex5060
       securityContext:
-        runAsUser: 65534
-        runAsGroup: 65534
-        runAsNonRoot: true
-        fsGroup: 65534
+        runAsUser: 0
+        runAsGroup: 0
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -42,8 +40,6 @@ spec:
               memory: 512Mi
           securityContext:
             allowPrivilegeEscalation: false
-            runAsUser: 65534
-            runAsGroup: 65534
             capabilities:
               drop:
                 - ALL
