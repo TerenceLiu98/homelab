@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: opensandbox-server
+  namespace: opensandbox-system
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - opensandbox.erotica.icu
+      secretName: erotica-icu-tls
+  rules:
+    - host: opensandbox.erotica.icu
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: opensandbox-server
+                port:
+                  number: 80

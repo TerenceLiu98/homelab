@@ -2,7 +2,8 @@
 
 This repository bootstraps and manages the `optiplex5060` k3s homelab platform.
 It includes Argo CD, global Dex authentication, Traefik ingress, GlusterFS-backed
-JuiceFS storage, Kyverno policy automation, Gitea with Actions, and Kubeflow.
+JuiceFS storage, Kyverno policy automation, Gitea with Actions, Kubeflow, and
+OpenSandbox.
 
 See [DESIGN.md](DESIGN.md) for the architecture and operational model.
 
@@ -15,6 +16,7 @@ See [DESIGN.md](DESIGN.md) for the architecture and operational model.
 - Kubeflow using the global Dex through `oauth2-proxy`.
 - Gitea using the global Dex as an OpenID Connect login source.
 - Gitea Actions runner with Docker-in-Docker for CI jobs.
+- OpenSandbox controller/server for creating Kubernetes-backed sandboxes.
 - `/dev/sda` host storage mounted at `/srv/k3s-data`.
 - GlusterFS volume `gv0` as the local storage backend.
 - Host Valkey/Redis metadata for JuiceFS.
@@ -44,6 +46,7 @@ docs                             Operational notes
   - `argo.<BASE_DOMAIN>`
   - `git.<BASE_DOMAIN>`
   - `kubeflow.<BASE_DOMAIN>`
+  - `opensandbox.<BASE_DOMAIN>`
 - GitHub OAuth app:
   - Homepage URL: `https://auth.<BASE_DOMAIN>`
   - Authorization callback URL: `https://auth.<BASE_DOMAIN>/callback`
@@ -120,6 +123,8 @@ sudo k3s kubectl get ingress -A
 sudo k3s kubectl get storageclass
 sudo k3s kubectl -n argocd get applications
 sudo k3s kubectl -n gitea get pods,ingress,pvc
+sudo k3s kubectl -n opensandbox-system get pods,svc,ingress
+sudo k3s kubectl get crd | grep sandbox.opensandbox.io
 sudo k3s kubectl get secret -A | grep erotica-icu-tls
 sudo k3s kubectl -n istio-system get requestauthentication dex-jwt -o yaml
 ```
@@ -133,6 +138,14 @@ Kubeflow UI after authenticating through the global Dex.
 
 Gitea is available at `https://git.<BASE_DOMAIN>`. The Dex callback URL rendered
 for Gitea is `https://git.<BASE_DOMAIN>/user/oauth2/dex/callback`.
+
+OpenSandbox is available at `https://opensandbox.<BASE_DOMAIN>`. It is deployed
+from the upstream controller and server Helm charts and configured for
+Kubernetes BatchSandbox workloads in the `opensandbox` namespace. The server
+expects the `OPEN-SANDBOX-API-KEY` header from the
+`opensandbox-system/opensandbox-api-key` Secret. To create an AIO sandbox, call
+the OpenSandbox API/SDK with image `ghcr.io/agent-infra/sandbox:latest`,
+entrypoint `/opt/gem/run.sh`, and AIO port `8080`.
 
 ## Secret Policy
 

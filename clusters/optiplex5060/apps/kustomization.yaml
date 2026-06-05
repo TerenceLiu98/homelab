@@ -10,3 +10,6 @@ resources:
   - gitea-actions.yaml
   - kubeflow.yaml
   - socks5.yaml
+  - opensandbox-prereqs.yaml
+  - opensandbox-controller.yaml
+  - opensandbox-server.yaml

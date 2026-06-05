@@ -1,0 +1,72 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
+  name: platform-opensandbox-server
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/opensandbox-group/OpenSandbox.git
+    targetRevision: helm/opensandbox/0.2.0
+    path: kubernetes/charts/opensandbox-server
+    helm:
+      releaseName: opensandbox-server
+      values: |
+        namespaceOverride: opensandbox-system
+        server:
+          env:
+            - name: OPENSANDBOX_SERVER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: opensandbox-api-key
+                  key: api-key
+          replicaCount: 1
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          gateway:
+            enabled: false
+
+        configToml: |
+          [server]
+          host = "0.0.0.0"
+          port = 80
+          api_key = ""
+
+          [log]
+          level = "INFO"
+
+          [runtime]
+          type = "kubernetes"
+          execd_image = "sandbox-registry.cn-zhangjiakou.cr.aliyuncs.com/opensandbox/execd:v1.0.16"
+
+          [kubernetes]
+          kubeconfig_path = ""
+          namespace = "opensandbox"
+          informer_enabled = true
+          informer_resync_seconds = 300
+          informer_watch_timeout_seconds = 60
+          sandbox_create_timeout_seconds = 300
+          sandbox_create_poll_interval_seconds = 1
+          snapshot_create_timeout_seconds = 900
+          workload_provider = "batchsandbox"
+          batchsandbox_template_file = "/etc/opensandbox/example.batchsandbox-template.yaml"
+
+          [egress]
+          image = "sandbox-registry.cn-zhangjiakou.cr.aliyuncs.com/opensandbox/egress:v1.0.11"
+          mode = "dns+nft"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: opensandbox-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

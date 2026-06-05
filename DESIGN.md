@@ -27,6 +27,7 @@ Traefik ingress from k3s
     +-- argo.<domain>      -> argocd/argocd-server
     +-- git.<domain>       -> gitea/gitea-http
     +-- kubeflow.<domain>  -> istio-system/istio-ingressgateway
+    +-- opensandbox.<domain> -> opensandbox-system/opensandbox-server
 
 Host services
     |
@@ -41,6 +42,8 @@ k3s cluster
     +-- storage            JuiceFS CSI and format job
     +-- kyverno            policy automation and TLS Secret sync
     +-- gitea              Git hosting and Gitea Actions runner
+    +-- opensandbox-system OpenSandbox controller and lifecycle API server
+    +-- opensandbox        OpenSandbox sandbox workloads
     +-- oauth2-proxy       Kubeflow OIDC gateway
     +-- istio-system       Kubeflow ingress and JWT validation
     +-- kubeflow           Kubeflow applications
@@ -65,6 +68,9 @@ applications:
 - `gitea.yaml`
 - `gitea-actions.yaml`
 - `kubeflow.yaml`
+- `opensandbox-prereqs.yaml`
+- `opensandbox-controller.yaml`
+- `opensandbox-server.yaml`
 
 Each app points at a folder under `platform/`.
 
@@ -134,6 +140,7 @@ the platform hostnames and forwards:
 - `auth.<domain>` to global Dex.
 - `argo.<domain>` to Argo CD.
 - `kubeflow.<domain>` to Kubeflow's Istio ingressgateway.
+- `opensandbox.<domain>` to the OpenSandbox lifecycle API server.
 
 Kubeflow still uses Istio internally because the upstream manifests expect it.
 Traefik is only the edge entrypoint.
@@ -155,6 +162,7 @@ that has an Ingress, currently:
 - `gitea`
 - `identity`
 - `istio-system`
+- `opensandbox-system`
 
 The Kyverno policy uses `synchronize: true`, so renewing the source Secret will
 propagate the certificate to the generated namespace copies.
@@ -186,6 +194,29 @@ The Argo CD Application applies kustomize patches for this cluster:
 
 Kubeflow on k3s is treated as a pragmatic homelab deployment focused on
 interactive notebooks rather than the full MLOps stack.
+
+## OpenSandbox
+
+OpenSandbox is installed through the upstream controller and server Helm charts
+from the `opensandbox-group/OpenSandbox` repository. The control plane runs in
+`opensandbox-system`:
+
+- `opensandbox-controller` installs the Sandbox CRDs and reconciles Kubernetes
+  `BatchSandbox` and `Pool` resources.
+- `opensandbox-server` exposes the lifecycle API used by the OpenSandbox SDK.
+
+The server runtime is configured as Kubernetes with workload namespace
+`opensandbox` and workload provider `batchsandbox`. The public API entrypoint is
+`https://opensandbox.<domain>` through Traefik. The chart gateway component is
+disabled for the initial homelab deployment; callers can still create AIO
+sandboxes by passing image `ghcr.io/agent-infra/sandbox:latest` and exposing AIO
+port `8080` through the OpenSandbox SDK/API. The server waits up to 300 seconds
+for sandbox readiness because the AIO image is large on first pull.
+
+The OpenSandbox API key is injected from the
+`opensandbox-system/opensandbox-api-key` Secret through
+`OPENSANDBOX_SERVER_API_KEY`. The secret value is not committed to Git; callers
+must send it as the `OPEN-SANDBOX-API-KEY` header.
 
 ## Gitea And Actions
 
