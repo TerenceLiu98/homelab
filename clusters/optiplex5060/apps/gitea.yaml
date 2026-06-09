@@ -85,7 +85,7 @@ spec:
             - name: dex
               provider: openidConnect
               existingSecret: gitea-oauth-dex
-              autoDiscoverUrl: https://auth.erotica.icu/.well-known/openid-configuration
+              autoDiscoverUrl: http://dex.identity.svc.cluster.local:5556/.well-known/openid-configuration
               scopes: openid email profile
           config:
             APP_NAME: Homelab Gitea
