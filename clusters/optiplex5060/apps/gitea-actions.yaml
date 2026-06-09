@@ -49,6 +49,13 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: gitea
+  ignoreDifferences:
+    - group: apps
+      kind: StatefulSet
+      name: gitea-actions-runner
+      namespace: gitea
+      jsonPointers:
+        - /spec
   syncPolicy:
     automated:
       prune: true
