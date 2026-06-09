@@ -337,7 +337,7 @@ spec:
                           # "{notebook-name}" is replaced with the Notebook name
                           name: "{notebook-name}-workspace"
                         spec:
-                          storageClassName: notebook-local
+                          storageClassName: juicefs-sc
                           resources:
                             requests:
                               storage: 5Gi

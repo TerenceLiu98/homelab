@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - kyverno.yaml
   - kyverno-policies.yaml
+  - network.yaml
   - storage.yaml
   - auth.yaml
   - ingress.yaml

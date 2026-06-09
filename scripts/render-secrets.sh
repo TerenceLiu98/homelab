@@ -7,7 +7,7 @@ cd "$(dirname "$0")/.."
 JUICEFS_SECRET_NAME="${JUICEFS_SECRET_NAME:-juicefs-sc-secret}"
 JUICEFS_SECRET_NAMESPACE="${JUICEFS_SECRET_NAMESPACE:-kube-system}"
 JUICEFS_STORAGE="${JUICEFS_STORAGE:-gluster}"
-JUICEFS_BUCKET="${JUICEFS_BUCKET:-${JUICEFS_OBJECT_PATH:-100.118.192.87/storage/gluster}}"
+JUICEFS_BUCKET="${JUICEFS_BUCKET:-${JUICEFS_OBJECT_PATH:-100.118.192.87/gv0/juicefs-objects}}"
 JUICEFS_ENVS="${JUICEFS_ENVS:-{JFS_DROP_OSCACHE: 1}}"
 
 require_env \
@@ -22,6 +22,7 @@ require_env \
   GITEA_ADMIN_USERNAME \
   GITEA_ADMIN_PASSWORD \
   GITEA_RUNNER_REGISTRATION_TOKEN \
+  OPENSANDBOX_API_KEY \
   DEX_LOCAL_ADMIN_EMAIL \
   DEX_LOCAL_ADMIN_USERNAME \
   DEX_LOCAL_ADMIN_BCRYPT_HASH \
@@ -164,6 +165,20 @@ metadata:
 type: Opaque
 stringData:
   token: "${GITEA_RUNNER_REGISTRATION_TOKEN}"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: opensandbox-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: opensandbox-api-key
+  namespace: opensandbox-system
+type: Opaque
+stringData:
+  api-key: "${OPENSANDBOX_API_KEY}"
 ---
 apiVersion: v1
 kind: Secret

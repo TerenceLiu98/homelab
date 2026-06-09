@@ -10,7 +10,11 @@ spec:
   valuesContent: |-
     controller:
       replicas: 1
+    globalConfig:
+      mountPodPatch:
+        - hostNetwork: true
+          dnsPolicy: ClusterFirstWithHostNet
     node:
+      hostNetwork: true
       tolerations:
         - operator: Exists
-

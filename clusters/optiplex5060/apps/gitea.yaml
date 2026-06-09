@@ -14,6 +14,8 @@ spec:
       values: |
         namespace: gitea
         replicaCount: 1
+        nodeSelector:
+          kubernetes.io/hostname: optiplex5060
 
         global:
           storageClass: juicefs-sc
@@ -65,6 +67,8 @@ spec:
               memory: 128Mi
 
         deployment:
+          strategy:
+            type: Recreate
           env:
             - name: GITEA_RUNNER_REGISTRATION_TOKEN
               valueFrom:
@@ -98,6 +102,9 @@ spec:
               SHOW_REGISTRATION_BUTTON: false
             actions:
               ENABLED: true
+            database:
+              DB_TYPE: sqlite3
+              PATH: /data/gitea/gitea.db
 
         valkey-cluster:
           enabled: false
@@ -106,22 +113,7 @@ spec:
         postgresql-ha:
           enabled: false
         postgresql:
-          enabled: true
-          global:
-            postgresql:
-              auth:
-                database: gitea
-                username: gitea
-                password: gitea
-          primary:
-            persistence:
-              size: 10Gi
-            resources:
-              requests:
-                cpu: 25m
-                memory: 128Mi
-              limits:
-                memory: 1Gi
+          enabled: false
 
         test:
           enabled: false
@@ -130,7 +122,7 @@ spec:
     namespace: gitea
   syncPolicy:
     automated:
-      prune: false
+      prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true

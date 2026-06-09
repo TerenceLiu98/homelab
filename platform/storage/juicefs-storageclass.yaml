@@ -2,10 +2,15 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: juicefs-sc
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
 provisioner: csi.juicefs.com
 reclaimPolicy: Retain
 allowVolumeExpansion: true
 volumeBindingMode: Immediate
+mountOptions:
+  - cache-size=204800
+  - writeback_cache
 parameters:
   csi.storage.k8s.io/provisioner-secret-name: juicefs-sc-secret
   csi.storage.k8s.io/provisioner-secret-namespace: kube-system
@@ -14,4 +19,3 @@ parameters:
   juicefs/clean-cache: "true"
   juicefs/mount-cpu-request: 50m
   juicefs/mount-memory-request: 256Mi
-  pathPattern: "${.PVC.namespace}/${.PVC.name}"

@@ -29,6 +29,7 @@ clusters/optiplex5060/bootstrap  One-time Argo CD bootstrap manifests
 clusters/optiplex5060/apps       Argo CD root application children
 platform/auth                    Global Dex
 platform/ingress                 Edge ingress resources
+platform/network                 Tailscale and Cilium host-network guard
 platform/storage                 JuiceFS CSI and StorageClass
 platform/kyverno-policies        TLS Secret sync policy
 platform/kubeflow                Kubeflow upstream Application and auth patches
@@ -39,7 +40,8 @@ docs                             Operational notes
 
 ## Prerequisites
 
-- Arch Linux host with k3s installed.
+- Arch Linux host with k3s installed with flannel disabled.
+- Cilium installed as the k3s CNI.
 - `/dev/sda` available as disposable data disk.
 - DNS records for:
   - `auth.<BASE_DOMAIN>`
@@ -65,13 +67,35 @@ docs                             Operational notes
    sudo scripts/prepare-host-storage.sh --device /dev/sda --yes
    ```
 
-3. Start the host Redis-compatible metadata service:
+3. Install the control-plane k3s server without flannel, then install Cilium:
+
+   ```sh
+   curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC='server --node-ip 100.118.192.87 --node-external-ip 100.118.192.87 --advertise-address 100.118.192.87 --tls-san 100.118.192.87 --flannel-backend=none --disable-network-policy --disable local-storage --write-kubeconfig-mode 0644' sh -
+   helm upgrade --install cilium cilium --repo https://helm.cilium.io --namespace kube-system --set k8sServiceHost=100.118.192.87 --set k8sServicePort=6443 --set ipam.mode=kubernetes --set operator.replicas=1 --set cni.confPath=/etc/cni/net.d --set cni.binPath=/opt/cni/bin
+   cilium status --wait
+   scripts/patch-metrics-server-tailscale.sh
+   ```
+
+   The k3s server must keep `--flannel-backend=none`; Cilium is the only CNI
+   for this cluster.
+
+4. Join the worker nodes. Agents inherit the server-side CNI choice, so do not
+   install or enable flannel on the agents:
+
+   ```sh
+   sudo cat /var/lib/rancher/k3s/server/node-token
+
+   ssh 100.121.31.95 "curl -sfL https://get.k3s.io | K3S_URL=https://100.118.192.87:6443 K3S_TOKEN='<node-token>' INSTALL_K3S_EXEC='agent --node-ip 100.121.31.95 --node-external-ip 100.121.31.95' sh -"
+   ssh 100.85.172.81 "curl -sfL https://get.k3s.io | K3S_URL=https://100.118.192.87:6443 K3S_TOKEN='<node-token>' INSTALL_K3S_EXEC='agent --node-ip 100.85.172.81 --node-external-ip 100.85.172.81' sh -"
+   ```
+
+5. Start the host Redis-compatible metadata service:
 
    ```sh
    sudo scripts/prepare-host-redis.sh 100.118.192.87
    ```
 
-4. Apply the source wildcard TLS Secret for Kyverno to clone:
+6. Apply the source wildcard TLS Secret for Kyverno to clone:
 
    ```sh
    scripts/apply-erotica-tls-source.sh
@@ -82,7 +106,7 @@ docs                             Operational notes
    - `/home/terenceliu/acme/ssl/erotica.icu.full.pem`
    - `/home/terenceliu/acme/ssl/erotica.icu.key`
 
-5. Create `.env`:
+7. Create `.env`:
 
    ```sh
    cp .env.example .env
@@ -92,15 +116,15 @@ docs                             Operational notes
    Gitea admin password, Gitea OIDC secret, Gitea runner token, and generated
    client/metadata secrets.
 
-6. Materialize placeholders before committing the GitOps repo:
+8. Materialize placeholders before committing the GitOps repo:
 
    ```sh
    scripts/materialize-config.sh --in-place
    ```
 
-7. Commit and push the repository to `GITOPS_REPO_URL`.
+9. Commit and push the repository to `GITOPS_REPO_URL`.
 
-8. Bootstrap Argo CD and the root app:
+10. Bootstrap Argo CD and the root app:
 
    ```sh
    scripts/bootstrap.sh

@@ -63,14 +63,13 @@ fi
 mount /srv/k3s-data
 
 mkdir -p \
-  /srv/k3s-data/local-path \
   /srv/k3s-data/gluster/bricks/gv0 \
   /srv/k3s-data/gluster/mounts/gv0 \
   /srv/k3s-data/juicefs-cache \
   /srv/k3s-data/gluster/mounts/gv0/juicefs-objects \
   /srv/k3s-data/backups
 
-chmod 0775 /srv/k3s-data /srv/k3s-data/local-path /srv/k3s-data/juicefs-cache /srv/k3s-data/gluster/mounts/gv0/juicefs-objects
+chmod 0775 /srv/k3s-data /srv/k3s-data/juicefs-cache /srv/k3s-data/gluster/mounts/gv0/juicefs-objects
 
 if command -v systemctl >/dev/null 2>&1 && command -v glusterd >/dev/null 2>&1; then
   systemctl enable --now glusterd
@@ -89,15 +88,6 @@ if command -v systemctl >/dev/null 2>&1 && command -v glusterd >/dev/null 2>&1; 
   fi
 else
   echo "glusterd is not installed; install glusterfs and rerun this script to create gv0." >&2
-fi
-
-if command -v k3s >/dev/null 2>&1; then
-  k3s kubectl -n kube-system patch configmap local-path-config --type merge -p '{
-    "data": {
-      "config.json": "{\n  \"nodePathMap\": [\n    {\n      \"node\": \"DEFAULT_PATH_FOR_NON_LISTED_NODES\",\n      \"paths\": [\"/srv/k3s-data/local-path\"]\n    }\n  ]\n}\n"
-    }
-  }'
-  k3s kubectl -n kube-system rollout restart deployment/local-path-provisioner
 fi
 
 echo "Host storage prepared at /srv/k3s-data"

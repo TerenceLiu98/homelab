@@ -5,7 +5,7 @@ metadata:
   namespace: identity
 spec:
   accessModes: ["ReadWriteOnce"]
-  storageClassName: local-path
+  storageClassName: juicefs-sc
   resources:
     requests:
       storage: 1Gi

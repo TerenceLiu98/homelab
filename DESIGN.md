@@ -10,7 +10,7 @@ Primary goals:
 
 - One identity source for all applications.
 - GitOps-managed cluster add-ons and Kubeflow configuration.
-- Local disk backed storage on `/dev/sda`.
+- Local disk backed object capacity on `/dev/sda`.
 - RWX persistent volumes through JuiceFS CSI.
 - Automatic TLS Secret fan-out for Ingress namespaces.
 - Minimal secret material in Git; generated secrets stay local.
@@ -37,6 +37,7 @@ Host services
 
 k3s cluster
     |
+    +-- cilium            CNI; k3s flannel is disabled
     +-- argocd             GitOps controller
     +-- identity           global Dex identity provider
     +-- storage            JuiceFS CSI and format job
@@ -60,6 +61,7 @@ k3s cluster
 `clusters/optiplex5060/apps` contains the root kustomization for platform
 applications:
 
+- `network.yaml`
 - `storage.yaml`
 - `kyverno.yaml`
 - `kyverno-policies.yaml`
@@ -115,7 +117,6 @@ The storage stack intentionally uses `/dev/sda` as disposable local capacity.
 
 Host layout:
 
-- `/srv/k3s-data/local-path` for the k3s local-path provisioner.
 - `/srv/k3s-data/gluster/bricks/gv0` for the GlusterFS brick.
 - `/srv/k3s-data/gluster/mounts/gv0` for the mounted GlusterFS volume.
 - `/srv/k3s-data/redis` for Valkey/Redis metadata persistence.
@@ -125,12 +126,31 @@ JuiceFS uses:
 
 - Metadata: host Valkey/Redis at `100.118.192.87:6379`, database `1`.
 - Object storage: JuiceFS `gluster` backend at
-  `100.118.192.87/storage/gluster`.
+  `100.118.192.87/gv0/juicefs-objects`.
 - Kubernetes access: `juicefs-sc` StorageClass through JuiceFS CSI, with
-  dynamic PV paths rendered as `<namespace>/<pvc-name>`.
+  dynamic PV paths left at the CSI driver's default `pvc-<uuid>` directory
+  names so a deleted and recreated same-name PVC does not accidentally reuse
+  stale data.
+- Mount behavior: new JuiceFS PVs use a larger client cache and FUSE
+  `writeback_cache` to reduce synchronous small-write overhead. This is still
+  not a substitute for a local/block-backed database volume for write-heavy
+  databases.
 
 This gives cluster workloads RWX PVCs without running MinIO or Redis inside the
 cluster.
+
+k3s is installed with flannel disabled and Cilium installed as the only CNI.
+Worker agents inherit this server-side CNI choice and should not install or
+enable flannel. The cluster should not install the k3s local-path provisioner;
+`juicefs-sc` is the default StorageClass and application PVCs should either omit
+`storageClassName` or explicitly use `juicefs-sc`.
+
+The cluster uses Tailscale node IPs as k3s internal and external node addresses.
+Because Cilium creates per-node PodCIDR router addresses, Tailscale can discover
+those `10.42.0.0/16` addresses as candidate direct WireGuard endpoints. The
+`platform-network` app installs a small privileged DaemonSet that rejects
+outbound UDP/41641 traffic to the Cilium PodCIDR so Tailscale falls back to a
+valid route instead of stalling on unroutable PodCIDR endpoints.
 
 ## Ingress
 
