@@ -9,7 +9,6 @@ spec:
     repoURL: https://github.com/TerenceLiu98/homelab.git
     targetRevision: experimental
     path: platform/socks5
-    kustomize: {}
   destination:
     server: https://kubernetes.default.svc
     namespace: socks5
@@ -19,4 +18,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true

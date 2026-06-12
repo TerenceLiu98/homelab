@@ -18,4 +18,18 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-
+      - RespectIgnoreDifferences=true
+  ignoreDifferences:
+    - group: argoproj.io
+      kind: Application
+      jsonPointers:
+        - /metadata/finalizers
+        - /metadata/resourceVersion
+        - /metadata/uid
+        - /metadata/creationTimestamp
+        - /metadata/generation
+        - /metadata/annotations
+        - /metadata/labels
+        - /metadata/managedFields
+        - /status
+        - /spec/source/kustomize

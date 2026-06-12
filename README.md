@@ -61,6 +61,24 @@ docs                             Operational notes
    scripts/install-host-tools-arch.sh
    ```
 
+   If you are doing a full cluster rebuild, you can run:
+
+```sh
+sudo scripts/redeploy-k3s.sh
+```
+
+Or run full sequence (single entrypoint):
+
+```sh
+sudo scripts/deploy-homelab-full.sh
+```
+
+If host disk prep is already done:
+
+```sh
+SKIP_HOST_STORAGE_PREP=1 sudo scripts/deploy-homelab-full.sh
+```
+
 2. Prepare `/dev/sda` and GlusterFS:
 
    ```sh
@@ -70,8 +88,8 @@ docs                             Operational notes
 3. Install the control-plane k3s server without flannel, then install Cilium:
 
    ```sh
-   curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC='server --node-ip 100.118.192.87 --node-external-ip 100.118.192.87 --advertise-address 100.118.192.87 --tls-san 100.118.192.87 --flannel-backend=none --disable-network-policy --disable local-storage --write-kubeconfig-mode 0644' sh -
-   helm upgrade --install cilium cilium --repo https://helm.cilium.io --namespace kube-system --set k8sServiceHost=100.118.192.87 --set k8sServicePort=6443 --set ipam.mode=kubernetes --set operator.replicas=1 --set cni.confPath=/etc/cni/net.d --set cni.binPath=/opt/cni/bin
+   curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC='server --node-ip 100.118.192.86 --node-external-ip 100.118.192.86 --advertise-address 100.118.192.86 --tls-san 100.118.192.86 --flannel-backend=none --disable-network-policy --disable local-storage --write-kubeconfig-mode 0644' sh -
+   helm upgrade --install cilium cilium --repo https://helm.cilium.io --namespace kube-system --set k8sServiceHost=100.118.192.86 --set k8sServicePort=6443 --set ipam.mode=kubernetes --set operator.replicas=1 --set cni.confPath=/etc/cni/net.d --set cni.binPath=/opt/cni/bin
    cilium status --wait
    scripts/patch-metrics-server-tailscale.sh
    ```
@@ -85,14 +103,14 @@ docs                             Operational notes
    ```sh
    sudo cat /var/lib/rancher/k3s/server/node-token
 
-   ssh 100.121.31.95 "curl -sfL https://get.k3s.io | K3S_URL=https://100.118.192.87:6443 K3S_TOKEN='<node-token>' INSTALL_K3S_EXEC='agent --node-ip 100.121.31.95 --node-external-ip 100.121.31.95' sh -"
-   ssh 100.85.172.81 "curl -sfL https://get.k3s.io | K3S_URL=https://100.118.192.87:6443 K3S_TOKEN='<node-token>' INSTALL_K3S_EXEC='agent --node-ip 100.85.172.81 --node-external-ip 100.85.172.81' sh -"
+   ssh 100.121.31.95 "curl -sfL https://get.k3s.io | K3S_URL=https://100.118.192.86:6443 K3S_TOKEN='<node-token>' INSTALL_K3S_EXEC='agent --node-ip 100.121.31.95 --node-external-ip 100.121.31.95' sh -"
+   ssh 100.85.172.81 "curl -sfL https://get.k3s.io | K3S_URL=https://100.118.192.86:6443 K3S_TOKEN='<node-token>' INSTALL_K3S_EXEC='agent --node-ip 100.85.172.81 --node-external-ip 100.85.172.81' sh -"
    ```
 
 5. Start the host Redis-compatible metadata service:
 
    ```sh
-   sudo scripts/prepare-host-redis.sh 100.118.192.87
+   sudo scripts/prepare-host-redis.sh 100.118.192.86
    ```
 
 6. Apply the source wildcard TLS Secret for Kyverno to clone:
@@ -142,16 +160,50 @@ sudo scripts/apply-storage-now.sh
 
 ```sh
 sudo k3s kubectl get nodes -o wide
+sudo k3s kubectl -n kube-system get pods -l app.kubernetes.io/name=cilium
 sudo k3s kubectl get pods -A
 sudo k3s kubectl get ingress -A
 sudo k3s kubectl get storageclass
 sudo k3s kubectl -n argocd get applications
 sudo k3s kubectl -n gitea get pods,ingress,pvc
+sudo k3s kubectl -n storage get pods
+sudo k3s kubectl -n kube-system get pods -l app.kubernetes.io/name=juicefs-csi-driver
+sudo k3s kubectl get storageclass juicefs-sc -o wide
 sudo k3s kubectl -n opensandbox-system get pods,svc,ingress
 sudo k3s kubectl get crd | grep sandbox.opensandbox.io
 sudo k3s kubectl get secret -A | grep erotica-icu-tls
 sudo k3s kubectl -n istio-system get requestauthentication dex-jwt -o yaml
 ```
+
+Or run:
+
+```sh
+scripts/verify-k3s-juicefs.sh
+```
+
+If `local-path` exists, it must not be the default:
+
+```sh
+sudo k3s kubectl get storageclass
+sudo k3s kubectl get sc local-path -o yaml
+```
+
+Before deployment, you can run static checks locally:
+
+```sh
+scripts/storage-audit.sh
+```
+
+Then run one of:
+
+```sh
+./scripts/deploy-checklist.sh
+./scripts/deploy-checklist.sh --skip-storage
+./scripts/deploy-checklist.sh --verify-only
+./scripts/deploy-checklist.sh --deploy-only
+```
+
+`deploy-checklist.sh` runs the full path: storage audit, bootstrap/deploy, node list, and juicefs verification.
 
 The Kubeflow JWT issuer should be `https://auth.<BASE_DOMAIN>`, not the disabled
 Kubeflow internal Dex service.
