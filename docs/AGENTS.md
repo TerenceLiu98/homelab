@@ -7,7 +7,7 @@ CNI.
 ## Cluster Facts
 
 - Repository path on the server: `/home/terenceliu/development/homelab`
-- k3s server Tailscale IP: `100.118.192.87`
+- k3s server Tailscale IP: `100.118.192.86`
 - k3s server hostname: `optiplex5060`
 - Known worker IP: `100.121.31.95`
 - Default SSH user for workers: `terenceliu`
@@ -17,7 +17,7 @@ CNI.
 ## Core assumptions
 
 Run these procedures from the k3s control-plane host or another host that has direct
-access to `https://100.118.192.87:6443` using a valid kubeconfig. Some sandboxed
+access to `https://100.118.192.86:6443` using a valid kubeconfig. Some sandboxed
 executions cannot contact localhost API (`socket: operation not permitted`) and are
 not representative of real host behavior.
 
@@ -114,7 +114,7 @@ Run from master host:
 ```sh
 cd /home/terenceliu/development/homelab
 WORKER_IPS="100.121.31.95" \
-  MASTER_IP="100.118.192.87" \
+  MASTER_IP="100.118.192.86" \
   REMOTE_USER="terenceliu" \
   SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=10" \
   scripts/join-workers.sh
@@ -129,7 +129,7 @@ If `node-token` is unreadable, force it through sudo or environment:
 NODE_TOKEN="$(sudo cat /var/lib/rancher/k3s/server/node-token)"
 WORKER_IPS="100.121.31.95" \
   NODE_TOKEN="$NODE_TOKEN" \
-  MASTER_IP="100.118.192.87" \
+  MASTER_IP="100.118.192.86" \
   REMOTE_USER="terenceliu" \
   SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=10" \
   scripts/join-workers.sh
@@ -141,7 +141,7 @@ Manual fallback when helper is not usable:
 NODE_TOKEN="$(sudo cat /var/lib/rancher/k3s/server/node-token)"
 ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 terenceliu@100.121.31.95 \
   "curl -sfL https://get.k3s.io | \
-   K3S_URL=https://100.118.192.87:6443 \
+   K3S_URL=https://100.118.192.86:6443 \
    K3S_TOKEN='$NODE_TOKEN' \
    INSTALL_K3S_EXEC='agent --node-ip 100.121.31.95 --node-external-ip 100.121.31.95' sh -"
 ```

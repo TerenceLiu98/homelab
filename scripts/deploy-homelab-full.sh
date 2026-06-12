@@ -4,7 +4,7 @@ set -eu
 # Full homelab bring-up entrypoint.
 # Run on optiplex5060 as root after pulling repo changes.
 
-: "${MASTER_IP:=100.118.192.87}"
+: "${MASTER_IP:=100.118.192.86}"
 : "${WORKER_IPS-100.121.31.95 100.85.172.81}"
 : "${REMOTE_USER:=terenceliu}"
 : "${SKIP_HOST_STORAGE_PREP:=0}"

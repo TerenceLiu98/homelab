@@ -11,7 +11,7 @@ Use the resulting client ID and secret in `.env`.
 
 ## DNS
 
-Create DNS records pointing to the Tailscale IP `100.118.192.87`:
+Create DNS records pointing to the Tailscale IP `100.118.192.86`:
 
 - `auth.${BASE_DOMAIN}`
 - `argo.${BASE_DOMAIN}`

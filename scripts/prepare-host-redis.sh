@@ -12,7 +12,7 @@ else
   NODE_IP="$(ip -4 addr show tailscale0 2>/dev/null | awk '/ inet / { sub("/.*", "", $2); print $2; exit }')"
   NODE_IP="${NODE_IP:-10.42.0.1}"
 fi
-CNI_IP="${CNI_IP:-10.42.0.1}"
+CNI_IP="${CNI_IP:-$(ip -4 addr show cilium_host 2>/dev/null | awk '/ inet / { sub("/.*", "", $2); print $2; exit }')}"
 PASS_FILE=/etc/valkey/k3s-juicefs.pass
 CONF=/etc/valkey/valkey.conf
 DATA_DIR=/srv/k3s-data/redis
@@ -42,7 +42,7 @@ sed -i '/^# BEGIN K3S JUICEFS$/,/^# END K3S JUICEFS$/d' "$CONF"
 cat >> "$CONF" <<EOF
 
 # BEGIN K3S JUICEFS
-bind 127.0.0.1 ${CNI_IP} ${NODE_IP}
+bind 127.0.0.1 ${CNI_IP:+${CNI_IP} }${NODE_IP}
 protected-mode yes
 port 6379
 dir ${DATA_DIR}

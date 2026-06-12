@@ -33,7 +33,7 @@ Host services
     |
     +-- /dev/sda -> /srv/k3s-data
     +-- GlusterFS gv0 mounted at /srv/k3s-data/gluster/mounts/gv0
-    +-- Valkey/Redis on 100.118.192.87:6379 for JuiceFS metadata
+    +-- Valkey/Redis on 100.118.192.86:6379 for JuiceFS metadata
 
 k3s cluster
     |
@@ -124,9 +124,9 @@ Host layout:
 
 JuiceFS uses:
 
-- Metadata: host Valkey/Redis at `100.118.192.87:6379`, database `1`.
+- Metadata: host Valkey/Redis at `100.118.192.86:6379`, database `1`.
 - Object storage: JuiceFS `gluster` backend at
-  `100.118.192.87/gv0/juicefs-objects`.
+  `100.118.192.86/gv0/juicefs-objects`.
 - Kubernetes access: `juicefs-sc` StorageClass through JuiceFS CSI, with
   dynamic PV paths left at the CSI driver's default `pvc-<uuid>` directory
   names so a deleted and recreated same-name PVC does not accidentally reuse
