@@ -25,7 +25,18 @@ fi
 
 uninstall_node() {
   ip="$1"
-  ${REMOTE_SSH} "${REMOTE_USER}@${ip}" "if command -v k3s >/dev/null 2>&1; then if [ -x /usr/local/bin/k3s-agent-uninstall.sh ]; then /usr/local/bin/k3s-agent-uninstall.sh; else k3s-killall.sh || true; fi; fi"
+  ${REMOTE_SSH} "${REMOTE_USER}@${ip}" "if command -v k3s >/dev/null 2>&1; then if [ -x /usr/local/bin/k3s-agent-uninstall.sh ]; then /usr/local/bin/k3s-agent-uninstall.sh; else k3s-killall.sh || true; fi; fi; for table in nat filter mangle raw; do for chain in OLD_CILIUM_PRE_nat OLD_CILIUM_POST_nat OLD_CILIUM_OUTPUT_nat OLD_CILIUM_INPUT OLD_CILIUM_OUTPUT OLD_CILIUM_FORWARD; do if sudo iptables -t \"\$table\" -S \"\$chain\" >/dev/null 2>&1; then sudo iptables -t \"\$table\" -F \"\$chain\" || true; sudo iptables -t \"\$table\" -X \"\$chain\" || true; fi; done; done"
+}
+
+cleanup_old_cilium_chains() {
+  for table in nat filter mangle raw; do
+    for chain in OLD_CILIUM_PRE_nat OLD_CILIUM_POST_nat OLD_CILIUM_OUTPUT_nat OLD_CILIUM_INPUT OLD_CILIUM_OUTPUT OLD_CILIUM_FORWARD; do
+      if iptables -t "$table" -S "$chain" >/dev/null 2>&1; then
+        iptables -t "$table" -F "$chain" || true
+        iptables -t "$table" -X "$chain" || true
+      fi
+    done
+  done
 }
 
 if [ "$UNINSTALL_PREVIOUS" = "1" ]; then
@@ -37,6 +48,8 @@ if [ "$UNINSTALL_PREVIOUS" = "1" ]; then
     uninstall_node "$ip"
   done
 fi
+
+cleanup_old_cilium_chains
 
 if [ "${SKIP_HOST_STORAGE_CHECK:-0}" != "1" ]; then
   if [ ! -d /srv/k3s-data/gluster/mounts/gv0 ]; then

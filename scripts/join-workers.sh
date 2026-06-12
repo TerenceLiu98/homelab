@@ -47,6 +47,10 @@ EOF
     continue
   fi
 
+  echo "[$ip] cleaning old Cilium iptables backup chains"
+  $SSH_BIN $SSH_OPTS ${REMOTE_USER}@${ip} \
+    'for table in nat filter mangle raw; do for chain in OLD_CILIUM_PRE_nat OLD_CILIUM_POST_nat OLD_CILIUM_OUTPUT_nat OLD_CILIUM_INPUT OLD_CILIUM_OUTPUT OLD_CILIUM_FORWARD; do if sudo iptables -t "$table" -S "$chain" >/dev/null 2>&1; then sudo iptables -t "$table" -F "$chain" || true; sudo iptables -t "$table" -X "$chain" || true; fi; done; done' || true
+
   echo "[$ip] installing k3s agent"
   if $SSH_BIN $SSH_OPTS ${REMOTE_USER}@${ip} \
     "curl -sfL https://get.k3s.io | K3S_URL=https://$MASTER_IP:6443 K3S_TOKEN='${NODE_TOKEN}' INSTALL_K3S_EXEC='agent --node-ip ${ip} --node-external-ip ${ip}' sh -"; then
