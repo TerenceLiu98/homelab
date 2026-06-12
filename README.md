@@ -89,7 +89,7 @@ SKIP_HOST_STORAGE_PREP=1 sudo scripts/deploy-homelab-full.sh
 
    ```sh
    curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC='server --node-ip 100.118.192.86 --node-external-ip 100.118.192.86 --advertise-address 100.118.192.86 --tls-san 100.118.192.86 --flannel-backend=none --disable-network-policy --disable local-storage --write-kubeconfig-mode 0644' sh -
-   helm upgrade --install cilium cilium --repo https://helm.cilium.io --namespace kube-system --set k8sServiceHost=100.118.192.86 --set k8sServicePort=6443 --set ipam.mode=kubernetes --set operator.replicas=1 --set cni.confPath=/etc/cni/net.d --set cni.binPath=/opt/cni/bin
+   helm upgrade --install cilium cilium --repo https://helm.cilium.io --namespace kube-system --set k8sServiceHost=100.118.192.86 --set k8sServicePort=6443 --set ipam.mode=kubernetes --set operator.replicas=1 --set cni.exclusive=false --set cni.confPath=/etc/cni/net.d --set cni.binPath=/opt/cni/bin
    cilium status --wait
    scripts/patch-metrics-server-tailscale.sh
    ```

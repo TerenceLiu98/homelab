@@ -74,6 +74,7 @@ if [ "$INSTALL_HELM" = "1" ]; then
     --set k8sServicePort=6443 \
     --set ipam.mode=kubernetes \
     --set operator.replicas=1 \
+    --set cni.exclusive=false \
     --set cni.confPath=/etc/cni/net.d \
     --set cni.binPath=/opt/cni/bin
   if command -v cilium >/dev/null 2>&1; then
