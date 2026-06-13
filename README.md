@@ -105,7 +105,11 @@ SKIP_HOST_STORAGE_PREP=1 sudo scripts/deploy-homelab-full.sh
 
    ssh 100.121.31.95 "curl -sfL https://get.k3s.io | K3S_URL=https://100.118.192.86:6443 K3S_TOKEN='<node-token>' INSTALL_K3S_EXEC='agent --node-ip 100.121.31.95 --node-external-ip 100.121.31.95' sh -"
    ssh 100.85.172.81 "curl -sfL https://get.k3s.io | K3S_URL=https://100.118.192.86:6443 K3S_TOKEN='<node-token>' INSTALL_K3S_EXEC='agent --node-ip 100.85.172.81 --node-external-ip 100.85.172.81' sh -"
+   sudo k3s kubectl label node <worker-node-name> kubeflow-compute=true --overwrite
    ```
+
+   Kubeflow notebooks use the `kubeflow-compute=true` node label by default.
+   Add it to every worker that should run notebook pods.
 
 5. Start the host Redis-compatible metadata service:
 

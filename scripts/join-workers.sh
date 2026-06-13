@@ -6,6 +6,7 @@ WORKER_IPS="${WORKER_IPS:-100.121.31.95 100.85.172.81}"
 REMOTE_USER="${REMOTE_USER:-terenceliu}"
 SSH_OPTS="${SSH_OPTS:--F /dev/null -o StrictHostKeyChecking=no -o ConnectTimeout=10}"
 SSH_BIN="${SSH_BIN:-ssh}"
+KUBECTL="${KUBECTL:-sudo k3s kubectl}"
 NODE_TOKEN="${NODE_TOKEN:-}"
 
 if [ ! -x "$(command -v "$SSH_BIN" )" ]; then
@@ -55,6 +56,13 @@ EOF
   if $SSH_BIN $SSH_OPTS ${REMOTE_USER}@${ip} \
     "curl -sfL https://get.k3s.io | K3S_URL=https://$MASTER_IP:6443 K3S_TOKEN='${NODE_TOKEN}' INSTALL_K3S_EXEC='agent --node-ip ${ip} --node-external-ip ${ip}' sh -"; then
     echo "[$ip] joined."
+    node_name="$(${KUBECTL} get nodes -o wide --no-headers | awk -v ip="$ip" '$0 ~ ip { print $1; exit }')"
+    if [ -n "$node_name" ]; then
+      echo "[$ip] labeling node $node_name as kubeflow-compute=true"
+      ${KUBECTL} label node "$node_name" kubeflow-compute=true --overwrite
+    else
+      echo "[$ip] node not visible yet; label it later with: ${KUBECTL} label node <node-name> kubeflow-compute=true --overwrite" >&2
+    fi
   else
     echo "[$ip] join command failed." >&2
   fi
@@ -63,3 +71,4 @@ done
 
 echo "Done. Verify:"
 echo "  k3s kubectl get nodes -o wide"
+echo "  k3s kubectl get nodes -l kubeflow-compute=true"
