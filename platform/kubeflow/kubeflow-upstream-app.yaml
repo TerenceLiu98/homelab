@@ -323,7 +323,7 @@ spec:
                   # Workspace Volumes
                   ################################################################
                   workspaceVolume:
-                    readOnly: true
+                    readOnly: false
 
                     # the default workspace volume to be created and mounted
                     # (to have no default, set `value: null`)
@@ -342,7 +342,7 @@ spec:
                             requests:
                               storage: 5Gi
                           accessModes:
-                          - ReadWriteOnce
+                          - ReadWriteMany
 
                   ################################################################
                   # Data Volumes
