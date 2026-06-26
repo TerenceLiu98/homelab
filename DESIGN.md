@@ -141,9 +141,11 @@ cluster.
 
 k3s is installed with flannel disabled and Cilium installed as the only CNI.
 Worker agents inherit this server-side CNI choice and should not install or
-enable flannel. The cluster should not install the k3s local-path provisioner;
-`juicefs-sc` is the default StorageClass and application PVCs should either omit
-`storageClassName` or explicitly use `juicefs-sc`.
+enable flannel. The cluster should not install the k3s local-path provisioner as
+the default storage backend; `juicefs-sc` is the default StorageClass and
+application PVCs should either omit `storageClassName` or explicitly use
+`juicefs-sc`. A node-scoped `local-path-thinkpad` StorageClass exists for
+workloads that need local disk on `thinkpadx13-2022`.
 
 The cluster uses Tailscale node IPs as k3s internal and external node addresses.
 Because Cilium creates per-node PodCIDR router addresses, Tailscale can discover

@@ -1,0 +1,177 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: local-path-thinkpad-provisioner-service-account
+  namespace: storage
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: local-path-thinkpad-provisioner-role
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+      - persistentvolumeclaims
+      - configmaps
+      - pods
+      - pods/log
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - create
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - persistentvolumes
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - watch
+      - create
+      - patch
+  - apiGroups:
+      - storage.k8s.io
+    resources:
+      - storageclasses
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: local-path-thinkpad-provisioner-bind
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: local-path-thinkpad-provisioner-role
+subjects:
+  - kind: ServiceAccount
+    name: local-path-thinkpad-provisioner-service-account
+    namespace: storage
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: local-path-config
+  namespace: storage
+data:
+  config.json: |-
+    {
+      "setupCommand": "/etc/config/setup",
+      "teardownCommand": "/etc/config/teardown",
+      "helperPodFile": "/etc/config/helperPod.yaml",
+      "nodePathMap": [
+        {
+          "node": "thinkpadx13-2022",
+          "paths": [
+            "/srv/k3s-local-path"
+          ]
+        }
+      ]
+    }
+  setup: |-
+    #!/bin/sh
+    set -eu
+    mkdir -m 0777 -p "$VOL_DIR"
+  teardown: |-
+    #!/bin/sh
+    set -eu
+    rm -rf "$VOL_DIR"
+  helperPod.yaml: |-
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: helper-pod
+    spec:
+      serviceAccountName: local-path-thinkpad-provisioner-service-account
+      restartPolicy: Never
+      containers:
+        - name: helper-pod
+          image: busybox:1.37
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: config
+              mountPath: /etc/config/
+      volumes:
+        - name: config
+          configMap:
+            name: local-path-config
+            defaultMode: 0777
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: local-path-thinkpad-provisioner
+  namespace: storage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: local-path-thinkpad-provisioner
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: local-path-thinkpad-provisioner
+    spec:
+      serviceAccountName: local-path-thinkpad-provisioner-service-account
+      containers:
+        - name: local-path-provisioner
+          image: rancher/local-path-provisioner:v0.0.31
+          imagePullPolicy: IfNotPresent
+          command:
+            - local-path-provisioner
+            - start
+            - --config
+            - /etc/config/config.json
+            - --provisioner-name
+            - cluster.local/local-path-thinkpad
+            - --service-account-name
+            - local-path-thinkpad-provisioner-service-account
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          volumeMounts:
+            - name: config
+              mountPath: /etc/config/
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+      volumes:
+        - name: config
+          configMap:
+            name: local-path-config
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-path-thinkpad
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: cluster.local/local-path-thinkpad
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: false

@@ -5,3 +5,4 @@ resources:
   - juicefs-csi.yaml
   - juicefs-format-job.yaml
   - juicefs-storageclass.yaml
+  - local-path-thinkpad.yaml
