@@ -423,15 +423,22 @@ spec:
                   # Tolerations
                   ################################################################
                   tolerationGroup:
-                    readOnly: false
+                    readOnly: true
 
                     # the `groupKey` of the default toleration group
                     # (to have no default, set as "")
                     # (if `readOnly`, the default `value` will be the only accessible option)
-                    value: ""
+                    value: "kubeflow_only"
 
                     # the list of available toleration groups in the dropdown
-                    options: []
+                    options:
+                      - groupKey: "kubeflow_only"
+                        displayName: "Kubeflow Compute Node"
+                        tolerations:
+                          - key: "workload"
+                            operator: "Equal"
+                            value: "kubeflow"
+                            effect: "NoSchedule"
                     #options:
                     #  - groupKey: "group_1"
                     #    displayName: "4 CPU 8Gb Mem at ~$X.XXX USD per day"
