@@ -8,7 +8,7 @@ set -eu
 : "${WORKER_IPS-100.121.31.95 100.85.172.81}"
 : "${REMOTE_USER:=terenceliu}"
 : "${SKIP_HOST_STORAGE_PREP:=0}"
-: "${BASE_DOMAIN:=erotica.icu}"
+: "${BASE_DOMAIN:=initio.cc}"
 : "${CERT_FILE:=/home/terenceliu/acme/ssl/${BASE_DOMAIN}.full.pem}"
 : "${KEY_FILE:=/home/terenceliu/acme/ssl/${BASE_DOMAIN}.key}"
 
@@ -35,7 +35,7 @@ WORKER_IPS="$WORKER_IPS" REMOTE_USER="$REMOTE_USER" MASTER_IP="$MASTER_IP" \
 
 if [ -f "$CERT_FILE" ] && [ -f "$KEY_FILE" ]; then
   echo "[3/6] Apply TLS source secret"
-  scripts/apply-erotica-tls-source.sh "$CERT_FILE" "$KEY_FILE"
+  scripts/apply-initio-tls-source.sh "$CERT_FILE" "$KEY_FILE"
 else
   echo "[3/6] TLS cert/key not found, skipping. Place them at ${CERT_FILE} and ${KEY_FILE} before running Kyverno policy."
 fi

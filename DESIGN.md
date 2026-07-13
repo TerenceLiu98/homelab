@@ -163,21 +163,22 @@ the platform hostnames and forwards:
 - `argo.<domain>` to Argo CD.
 - `kubeflow.<domain>` to Kubeflow's Istio ingressgateway.
 - `opensandbox.<domain>` to the OpenSandbox lifecycle API server.
+- `platform.<domain>` to Hephaestus and its workspace routes.
 
 Kubeflow still uses Istio internally because the upstream manifests expect it.
 Traefik is only the edge entrypoint.
 
 All public Ingress resources use the same TLS Secret name:
-`erotica-icu-tls`.
+`initio-cc-tls`.
 
 The source TLS Secret is stored in the `kyverno` namespace and created from the
 host ACME files:
 
-- `/home/terenceliu/acme/ssl/erotica.icu.full.pem`
-- `/home/terenceliu/acme/ssl/erotica.icu.key`
+- `/home/terenceliu/acme/ssl/initio.cc.full.pem`
+- `/home/terenceliu/acme/ssl/initio.cc.key`
 
-`scripts/apply-erotica-tls-source.sh` creates or updates
-`kyverno/erotica-icu-tls`. Kyverno then clones that Secret into every namespace
+`scripts/apply-initio-tls-source.sh` creates or updates
+`kyverno/initio-cc-tls`. Kyverno then clones that Secret into every namespace
 that has an Ingress, currently:
 
 - `argocd`
@@ -185,6 +186,7 @@ that has an Ingress, currently:
 - `identity`
 - `istio-system`
 - `opensandbox-system`
+- `hephaestus-system`
 
 The Kyverno policy uses `synchronize: true`, so renewing the source Secret will
 propagate the certificate to the generated namespace copies.
@@ -270,7 +272,7 @@ Generated Gitea secrets are rendered from `.env` by `scripts/render-secrets.sh`:
 1. Install host packages with `scripts/install-host-tools-arch.sh`.
 2. Prepare `/dev/sda` and GlusterFS with `scripts/prepare-host-storage.sh`.
 3. Start host Valkey/Redis metadata with `scripts/prepare-host-redis.sh`.
-4. Apply the source TLS Secret with `scripts/apply-erotica-tls-source.sh`.
+4. Apply the source TLS Secret with `scripts/apply-initio-tls-source.sh`.
 5. Fill `.env` from `.env.example`.
 6. Render and apply storage secrets if storage is needed before Argo CD:
    `scripts/apply-storage-now.sh`.

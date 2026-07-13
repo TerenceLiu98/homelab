@@ -15,16 +15,16 @@ spec:
   createNamespace: true
   valuesContent: |-
     global:
-      domain: argo.erotica.icu
+      domain: argo.initio.cc
     crds:
       install: true
     configs:
       cm:
-        url: https://argo.erotica.icu
+        url: https://argo.initio.cc
         application.resourceTrackingMethod: annotation
         oidc.config: |
           name: Dex
-          issuer: https://auth.erotica.icu
+          issuer: https://auth.initio.cc
           clientID: argo-cd
           clientSecret: $oidc.dex.clientSecret
           requestedScopes:
@@ -44,12 +44,12 @@ spec:
       ingress:
         enabled: true
         ingressClassName: traefik
-        hostname: argo.erotica.icu
+        hostname: argo.initio.cc
         tls: false
         extraTls:
           - hosts:
-              - argo.erotica.icu
-            secretName: erotica-icu-tls
+              - argo.initio.cc
+            secretName: initio-cc-tls
       resources:
         requests:
           cpu: 100m

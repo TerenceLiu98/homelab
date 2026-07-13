@@ -36,13 +36,13 @@ spec:
           enabled: true
           className: traefik
           hosts:
-            - host: git.erotica.icu
+            - host: git.initio.cc
               paths:
                 - path: /
           tls:
-            - secretName: erotica-icu-tls
+            - secretName: initio-cc-tls
               hosts:
-                - git.erotica.icu
+                - git.initio.cc
 
         persistence:
           enabled: true
@@ -79,7 +79,7 @@ spec:
         gitea:
           admin:
             existingSecret: gitea-admin
-            email: admin@erotica.icu
+            email: admin@initio.cc
             passwordMode: initialOnlyNoReset
           oauth:
             - name: dex
@@ -90,8 +90,8 @@ spec:
           config:
             APP_NAME: Homelab Gitea
             server:
-              DOMAIN: git.erotica.icu
-              ROOT_URL: https://git.erotica.icu/
+              DOMAIN: git.initio.cc
+              ROOT_URL: https://git.initio.cc/
               PROTOCOL: http
               HTTP_PORT: 3000
               DISABLE_SSH: true

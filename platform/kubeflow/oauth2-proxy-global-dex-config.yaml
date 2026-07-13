@@ -6,7 +6,7 @@ metadata:
 data:
   oauth2_proxy.cfg: |-
     provider = "oidc"
-    oidc_issuer_url = "https://auth.erotica.icu"
+    oidc_issuer_url = "https://auth.initio.cc"
     scope = "profile email groups openid"
     email_domains = [ "*" ]
 
@@ -19,7 +19,7 @@ data:
     ]
 
     skip_oidc_discovery = true
-    login_url = "https://auth.erotica.icu/auth"
+    login_url = "https://auth.initio.cc/auth"
     redeem_url = "http://dex.identity.svc.cluster.local:5556/token"
     oidc_jwks_url = "http://dex.identity.svc.cluster.local:5556/keys"
 
@@ -38,4 +38,4 @@ data:
     cookie_refresh = 0
 
     code_challenge_method = "S256"
-    redirect_url = "https://kubeflow.erotica.icu/oauth2/callback"
+    redirect_url = "https://kubeflow.initio.cc/oauth2/callback"

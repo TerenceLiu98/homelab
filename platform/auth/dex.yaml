@@ -94,10 +94,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - auth.erotica.icu
-      secretName: erotica-icu-tls
+        - auth.initio.cc
+      secretName: initio-cc-tls
   rules:
-    - host: auth.erotica.icu
+    - host: auth.initio.cc
       http:
         paths:
           - path: /

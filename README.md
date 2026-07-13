@@ -49,6 +49,7 @@ docs                             Operational notes
   - `git.<BASE_DOMAIN>`
   - `kubeflow.<BASE_DOMAIN>`
   - `opensandbox.<BASE_DOMAIN>`
+  - `platform.<BASE_DOMAIN>`
 - GitHub OAuth app:
   - Homepage URL: `https://auth.<BASE_DOMAIN>`
   - Authorization callback URL: `https://auth.<BASE_DOMAIN>/callback`
@@ -120,13 +121,13 @@ SKIP_HOST_STORAGE_PREP=1 sudo scripts/deploy-homelab-full.sh
 6. Apply the source wildcard TLS Secret for Kyverno to clone:
 
    ```sh
-   scripts/apply-erotica-tls-source.sh
+   scripts/apply-initio-tls-source.sh
    ```
 
    By default this reads:
 
-   - `/home/terenceliu/acme/ssl/erotica.icu.full.pem`
-   - `/home/terenceliu/acme/ssl/erotica.icu.key`
+   - `/home/terenceliu/acme/ssl/initio.cc.full.pem`
+   - `/home/terenceliu/acme/ssl/initio.cc.key`
 
 7. Create `.env`:
 
@@ -175,7 +176,7 @@ sudo k3s kubectl -n kube-system get pods -l app.kubernetes.io/name=juicefs-csi-d
 sudo k3s kubectl get storageclass juicefs-sc -o wide
 sudo k3s kubectl -n opensandbox-system get pods,svc,ingress
 sudo k3s kubectl get crd | grep sandbox.opensandbox.io
-sudo k3s kubectl get secret -A | grep erotica-icu-tls
+sudo k3s kubectl get secret -A | grep initio-cc-tls
 sudo k3s kubectl -n istio-system get requestauthentication dex-jwt -o yaml
 ```
 

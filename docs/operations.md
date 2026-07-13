@@ -18,6 +18,7 @@ Create DNS records pointing to the Tailscale IP `100.118.192.86`:
 - `kubeflow.${BASE_DOMAIN}`
 - `git.${BASE_DOMAIN}`
 - `opensandbox.${BASE_DOMAIN}`
+- `platform.${BASE_DOMAIN}`
 
 ## Full Redeploy
 
@@ -45,7 +46,7 @@ sudo k3s kubectl get pods -A
 sudo k3s kubectl get storageclass
 sudo k3s kubectl -n kube-system get pods -l app.kubernetes.io/name=cilium
 sudo k3s kubectl get ingress -A
-sudo k3s kubectl get secret -A | grep erotica-icu-tls
+sudo k3s kubectl get secret -A | grep initio-cc-tls
 sudo k3s kubectl -n argocd get applications
 ```
 
@@ -54,10 +55,10 @@ sudo k3s kubectl -n argocd get applications
 After renewing the ACME certificate, update the source Secret:
 
 ```sh
-scripts/apply-erotica-tls-source.sh
+scripts/apply-initio-tls-source.sh
 ```
 
-Kyverno synchronizes `kyverno/erotica-icu-tls` into the namespaces that own
+Kyverno synchronizes `kyverno/initio-cc-tls` into the namespaces that own
 Ingress resources.
 
 ## Storage smoke test

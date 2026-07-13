@@ -56,7 +56,7 @@ spec:
           patch: |-
             - op: replace
               path: /spec/jwtRules/0/issuer
-              value: https://auth.erotica.icu
+              value: https://auth.initio.cc
             - op: add
               path: /spec/jwtRules/0/jwksUri
               value: http://dex.identity.svc.cluster.local:5556/keys

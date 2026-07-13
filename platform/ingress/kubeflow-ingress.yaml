@@ -7,10 +7,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - kubeflow.erotica.icu
-      secretName: erotica-icu-tls
+        - kubeflow.initio.cc
+      secretName: initio-cc-tls
   rules:
-    - host: kubeflow.erotica.icu
+    - host: kubeflow.initio.cc
       http:
         paths:
           - path: /

@@ -7,10 +7,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - opensandbox.erotica.icu
-      secretName: erotica-icu-tls
+        - opensandbox.initio.cc
+      secretName: initio-cc-tls
   rules:
-    - host: opensandbox.erotica.icu
+    - host: opensandbox.initio.cc
       http:
         paths:
           - path: /

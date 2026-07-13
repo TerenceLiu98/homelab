@@ -20,7 +20,7 @@ spec:
           patch: |-
             - op: replace
               path: /spec/tls/0/secretName
-              value: erotica-icu-tls
+              value: initio-cc-tls
   destination:
     server: https://kubernetes.default.svc
     namespace: identity

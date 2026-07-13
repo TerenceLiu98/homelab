@@ -1,10 +1,10 @@
 #!/usr/bin/env sh
 set -eu
 
-CERT_FILE="${1:-/home/terenceliu/acme/ssl/erotica.icu.full.pem}"
-KEY_FILE="${2:-/home/terenceliu/acme/ssl/erotica.icu.key}"
+CERT_FILE="${1:-/home/terenceliu/acme/ssl/initio.cc.full.pem}"
+KEY_FILE="${2:-/home/terenceliu/acme/ssl/initio.cc.key}"
 NAMESPACE=kyverno
-SECRET_NAME=erotica-icu-tls
+SECRET_NAME=initio-cc-tls
 
 if [ ! -f "$CERT_FILE" ]; then
   echo "Certificate file not found: $CERT_FILE" >&2
