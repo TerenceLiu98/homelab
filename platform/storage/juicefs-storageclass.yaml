@@ -9,7 +9,9 @@ reclaimPolicy: Retain
 allowVolumeExpansion: true
 volumeBindingMode: Immediate
 mountOptions:
-  - cache-size=204800
+  - cache-dir=/var/jfsCache
+  - cache-size=30720
+  - free-space-ratio=0.20
   - writeback_cache
 parameters:
   csi.storage.k8s.io/provisioner-secret-name: juicefs-sc-secret

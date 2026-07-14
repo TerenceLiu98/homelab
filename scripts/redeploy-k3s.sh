@@ -7,6 +7,7 @@ REMOTE_USER="${REMOTE_USER:-terenceliu}"
 [ -z "${REMOTE_SSH:-}" ] && REMOTE_SSH="ssh -F /dev/null -o StrictHostKeyChecking=no"
 INSTALL_HELM="${INSTALL_HELM:-1}"
 UNINSTALL_PREVIOUS="${UNINSTALL_PREVIOUS:-1}"
+CILIUM_MTU="${CILIUM_MTU:-1230}"
 
 if [ "$(id -u)" -ne 0 ]; then
   echo "Run this script as root on optiplex5060." >&2
@@ -73,6 +74,7 @@ if [ "$INSTALL_HELM" = "1" ]; then
     --set k8sServiceHost="${MASTER_IP}" \
     --set k8sServicePort=6443 \
     --set ipam.mode=kubernetes \
+    --set mtu="${CILIUM_MTU}" \
     --set operator.replicas=1 \
     --set cni.exclusive=false \
     --set cni.confPath=/etc/cni/net.d \

@@ -9,18 +9,6 @@ spec:
     repoURL: https://github.com/TerenceLiu98/homelab.git
     targetRevision: experimental
     path: platform/ingress
-    kustomize:
-      patches:
-        - target:
-            group: networking.k8s.io
-            version: v1
-            kind: Ingress
-            name: kubeflow
-            namespace: istio-system
-          patch: |-
-            - op: replace
-              path: /spec/tls/0/secretName
-              value: erotica-icu-tls
   destination:
     server: https://kubernetes.default.svc
     namespace: istio-system

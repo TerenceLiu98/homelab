@@ -201,7 +201,7 @@ spec:
 
                     # the default ImagePullPolicy
                     # (possible values: "Always", "IfNotPresent", "Never")
-                    value: Always
+                    value: IfNotPresent
 
                   ################################################################
                   # Jupyter-like Container Images
@@ -218,10 +218,7 @@ spec:
                     options:
                     - ghcr.io/kubeflow/kubeflow/notebook-servers/jupyter-scipy:v1.10.0
                     - ghcr.io/kubeflow/kubeflow/notebook-servers/jupyter-pytorch-full:v1.10.0
-                    - ghcr.io/kubeflow/kubeflow/notebook-servers/jupyter-pytorch-cuda-full:v1.10.0
-                    - ghcr.io/kubeflow/kubeflow/notebook-servers/jupyter-pytorch-gaudi-full:v1.10.0
                     - ghcr.io/kubeflow/kubeflow/notebook-servers/jupyter-tensorflow-full:v1.10.0
-                    - ghcr.io/kubeflow/kubeflow/notebook-servers/jupyter-tensorflow-cuda-full:v1.10.0
 
                   ################################################################
                   # VSCode-like Container Images (Group 1)
@@ -336,6 +333,8 @@ spec:
                         metadata:
                           # "{notebook-name}" is replaced with the Notebook name
                           name: "{notebook-name}-workspace"
+                          labels:
+                            homelab.io/storage-profile: kubeflow
                         spec:
                           storageClassName: juicefs-sc
                           resources:
