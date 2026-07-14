@@ -217,7 +217,7 @@ spec:
                     # the list of available container images in the dropdown
                     options:
                     # OpenCode AI Agent UI (supports Kubeflow's NB_PREFIX base path)
-                    - terencelau/kubeflow:kubeflow-ubuntu-24.04-opencode-1.17.20-kubeflow.1
+                    - terencelau/kubeflow:kubeflow-ubuntu-24.04-opencode-1.17.20-kubeflow.2
                     - ghcr.io/kubeflow/kubeflow/notebook-servers/jupyter-scipy:v1.10.0
                     - ghcr.io/kubeflow/kubeflow/notebook-servers/jupyter-pytorch-full:v1.10.0
                     - ghcr.io/kubeflow/kubeflow/notebook-servers/jupyter-tensorflow-full:v1.10.0
