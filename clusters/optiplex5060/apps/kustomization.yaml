@@ -7,6 +7,10 @@ resources:
   - auth.yaml
   - ingress.yaml
   - chrome.yaml
+  - socks5.yaml
+  - opensandbox-prereqs.yaml
+  - opensandbox-controller.yaml
+  - opensandbox-server.yaml
   # Gitea is not required by Kubeflow and remains disabled.
   # - gitea.yaml
   # - gitea-actions.yaml
