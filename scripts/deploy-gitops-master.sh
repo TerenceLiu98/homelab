@@ -4,7 +4,7 @@ set -eu
 cd "$(dirname "$0")/.."
 . scripts/load-env.sh
 
-export MASTER_IP="${MASTER_IP:-100.118.192.86}"
+export MASTER_IP="${MASTER_IP:-192.168.2.153}"
 
 require_env \
   BASE_DOMAIN \

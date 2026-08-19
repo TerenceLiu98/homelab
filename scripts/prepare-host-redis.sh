@@ -9,8 +9,8 @@ fi
 if [ "${1:-}" ]; then
   NODE_IP="$1"
 else
-  NODE_IP="$(ip -4 addr show tailscale0 2>/dev/null | awk '/ inet / { sub("/.*", "", $2); print $2; exit }')"
-  NODE_IP="${NODE_IP:-10.42.0.1}"
+  NODE_IP="$(ip -4 addr show eno1 2>/dev/null | awk '/ inet / { sub("/.*", "", $2); print $2; exit }')"
+  NODE_IP="${NODE_IP:-192.168.2.153}"
 fi
 CNI_IP="${CNI_IP:-$(ip -4 addr show cilium_host 2>/dev/null | awk '/ inet / { sub("/.*", "", $2); print $2; exit }')}"
 PASS_FILE=/etc/valkey/k3s-juicefs.pass

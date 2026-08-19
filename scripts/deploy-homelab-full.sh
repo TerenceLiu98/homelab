@@ -4,8 +4,8 @@ set -eu
 # Full homelab bring-up entrypoint.
 # Run on optiplex5060 as root after pulling repo changes.
 
-: "${MASTER_IP:=100.118.192.86}"
-: "${WORKER_IPS-100.121.31.95 100.85.172.81}"
+: "${MASTER_IP:=192.168.2.153}"
+: "${WORKER_IPS-192.168.2.148 192.168.2.197}"
 : "${REMOTE_USER:=terenceliu}"
 : "${SKIP_HOST_STORAGE_PREP:=0}"
 : "${BASE_DOMAIN:=initio.cc}"
@@ -22,6 +22,11 @@ if [ "$SKIP_HOST_STORAGE_PREP" = "1" ]; then
 else
   echo "[1/6] Prepare host storage on ${MASTER_IP}"
   scripts/prepare-host-storage.sh --device /dev/sda --yes
+  for ip in $WORKER_IPS; do
+    echo "[1/6] Prepare host storage on agent ${ip}"
+    ssh -F /dev/null -o StrictHostKeyChecking=no "${REMOTE_USER}@${ip}" \
+      "sudo mkdir -p /srv/k3s-data/gluster/mounts/gv0 && if ! findmnt -rn /srv/k3s-data/gluster/mounts/gv0 >/dev/null 2>&1; then sudo mount -t glusterfs ${MASTER_IP}:/gv0 /srv/k3s-data/gluster/mounts/gv0; fi && if ! grep -q '/srv/k3s-data/gluster/mounts/gv0' /etc/fstab; then echo '${MASTER_IP}:/gv0 /srv/k3s-data/gluster/mounts/gv0 glusterfs defaults,_netdev 0 0' | sudo tee -a /etc/fstab; fi"
+  done
 fi
 
 echo "[2/6] Deploy k3s + Cilium + join workers"

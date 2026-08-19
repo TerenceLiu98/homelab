@@ -3,10 +3,10 @@ kind: Kustomization
 resources:
   - kyverno.yaml
   - kyverno-policies.yaml
-  - network.yaml
   - storage.yaml
   - auth.yaml
   - ingress.yaml
+  - chrome.yaml
   # Gitea is not required by Kubeflow and remains disabled.
   # - gitea.yaml
   # - gitea-actions.yaml

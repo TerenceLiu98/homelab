@@ -29,7 +29,7 @@ clusters/optiplex5060/bootstrap  One-time Argo CD bootstrap manifests
 clusters/optiplex5060/apps       Argo CD root application children
 platform/auth                    Global Dex
 platform/ingress                 Edge ingress resources
-platform/network                 Tailscale and Cilium host-network guard
+platform/ingress                   Traefik Ingresses for platform hostnames
 platform/storage                 JuiceFS CSI and StorageClass
 platform/kyverno-policies        TLS Secret sync policy
 platform/kubeflow                Kubeflow upstream Application and auth patches
@@ -89,10 +89,9 @@ SKIP_HOST_STORAGE_PREP=1 sudo scripts/deploy-homelab-full.sh
 3. Install the control-plane k3s server without flannel, then install Cilium:
 
    ```sh
-   curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC='server --node-ip 100.118.192.86 --node-external-ip 100.118.192.86 --advertise-address 100.118.192.86 --tls-san 100.118.192.86 --flannel-backend=none --disable-network-policy --disable local-storage --write-kubeconfig-mode 0644' sh -
-   helm upgrade --install cilium cilium --repo https://helm.cilium.io --namespace kube-system --set k8sServiceHost=100.118.192.86 --set k8sServicePort=6443 --set ipam.mode=kubernetes --set operator.replicas=1 --set cni.exclusive=false --set cni.confPath=/etc/cni/net.d --set cni.binPath=/opt/cni/bin
+   curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC='server --node-ip 192.168.2.153 --node-external-ip 192.168.2.153 --advertise-address 192.168.2.153 --tls-san 192.168.2.153 --flannel-backend=none --disable-network-policy --disable local-storage --write-kubeconfig-mode 0644' sh -
+   helm upgrade --install cilium cilium --repo https://helm.cilium.io --namespace kube-system --set k8sServiceHost=192.168.2.153 --set k8sServicePort=6443 --set ipam.mode=kubernetes --set operator.replicas=1 --set cni.exclusive=false --set cni.confPath=/etc/cni/net.d --set cni.binPath=/opt/cni/bin
    cilium status --wait
-   scripts/patch-metrics-server-tailscale.sh
    ```
 
    The k3s server must keep `--flannel-backend=none`; Cilium is the only CNI
@@ -104,8 +103,8 @@ SKIP_HOST_STORAGE_PREP=1 sudo scripts/deploy-homelab-full.sh
    ```sh
    sudo cat /var/lib/rancher/k3s/server/node-token
 
-   ssh 100.121.31.95 "curl -sfL https://get.k3s.io | K3S_URL=https://100.118.192.86:6443 K3S_TOKEN='<node-token>' INSTALL_K3S_EXEC='agent --node-ip 100.121.31.95 --node-external-ip 100.121.31.95' sh -"
-   ssh 100.85.172.81 "curl -sfL https://get.k3s.io | K3S_URL=https://100.118.192.86:6443 K3S_TOKEN='<node-token>' INSTALL_K3S_EXEC='agent --node-ip 100.85.172.81 --node-external-ip 100.85.172.81' sh -"
+   ssh 192.168.2.148 "curl -sfL https://get.k3s.io | K3S_URL=https://192.168.2.153:6443 K3S_TOKEN='<node-token>' INSTALL_K3S_EXEC='agent --node-ip 192.168.2.148 --node-external-ip 192.168.2.148' sh -"
+   ssh 192.168.2.197 "curl -sfL https://get.k3s.io | K3S_URL=https://192.168.2.153:6443 K3S_TOKEN='<node-token>' INSTALL_K3S_EXEC='agent --node-ip 192.168.2.197 --node-external-ip 192.168.2.197' sh -"
    sudo k3s kubectl label node <worker-node-name> kubeflow-compute=true --overwrite
    ```
 
@@ -115,7 +114,7 @@ SKIP_HOST_STORAGE_PREP=1 sudo scripts/deploy-homelab-full.sh
 5. Start the host Redis-compatible metadata service:
 
    ```sh
-   sudo scripts/prepare-host-redis.sh 100.118.192.86
+   sudo scripts/prepare-host-redis.sh 192.168.2.153
    ```
 
 6. Apply the source wildcard TLS Secret for Kyverno to clone:

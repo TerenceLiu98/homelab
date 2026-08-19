@@ -11,6 +11,6 @@ spec:
       port: 8081
       targetPort: socks5
       protocol: TCP
-  # Expose the service directly on the Optiplex5060 Tailscale IP.
+  # Expose the service directly on the Optiplex5060 intranet IP.
   externalIPs:
-    - 100.118.192.86
+    - 192.168.2.153

@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 set -eu
 
-MASTER_IP="${MASTER_IP:-100.118.192.86}"
-WORKER_IPS="${WORKER_IPS:-100.91.121.121}"
+MASTER_IP="${MASTER_IP:-192.168.2.153}"
+WORKER_IPS="${WORKER_IPS:-192.168.2.148 192.168.2.197}"
 REMOTE_USER="${REMOTE_USER:-terenceliu}"
 SSH_OPTS="${SSH_OPTS:--F /dev/null -o StrictHostKeyChecking=no -o ConnectTimeout=10}"
 SSH_BIN="${SSH_BIN:-ssh}"

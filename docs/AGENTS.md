@@ -1,15 +1,15 @@
 # Agent Runbook
 
 This file is for agents operating this repository without extra context.
-The target environment is a k3s homelab using Tailscale node IPs and Cilium as
-CNI.
+The target environment is a k3s homelab using intranet node IPs and Cilium as
+CNI. Changes should remain compatible with the pure-intranet setup.
 
 ## Cluster Facts
 
 - Repository path on the server: `/home/terenceliu/development/homelab`
-- k3s server Tailscale IP: `100.118.192.86`
+- k3s server intranet IP: `192.168.2.153`
 - k3s server hostname: `optiplex5060`
-- Known worker IP: `100.121.31.95`
+- Known worker IP: `192.168.2.148`
 - Default SSH user for workers: `terenceliu`
 - k3s must not run flannel on workers in this repo (server policy applies to agent
   networking as inherited CNI)
@@ -17,7 +17,7 @@ CNI.
 ## Core assumptions
 
 Run these procedures from the k3s control-plane host or another host that has direct
-access to `https://100.118.192.86:6443` using a valid kubeconfig. Some sandboxed
+access to `https://192.168.2.153:6443` using a valid kubeconfig. Some sandboxed
 executions cannot contact localhost API (`socket: operation not permitted`) and are
 not representative of real host behavior.
 
@@ -107,14 +107,14 @@ sudo k3s kubectl get ingress -A
 
 Expected: `argocd` namespace exists and the root app moves toward healthy sync.
 
-## Add a worker node (100.121.31.95)
+## Add a worker node (192.168.2.148)
 
 Run from master host:
 
 ```sh
 cd /home/terenceliu/development/homelab
-WORKER_IPS="100.121.31.95" \
-  MASTER_IP="100.118.192.86" \
+WORKER_IPS="192.168.2.148" \
+  MASTER_IP="192.168.2.153" \
   REMOTE_USER="terenceliu" \
   SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=10" \
   scripts/join-workers.sh
@@ -127,9 +127,9 @@ If `node-token` is unreadable, force it through sudo or environment:
 
 ```sh
 NODE_TOKEN="$(sudo cat /var/lib/rancher/k3s/server/node-token)"
-WORKER_IPS="100.121.31.95" \
+WORKER_IPS="192.168.2.148" \
   NODE_TOKEN="$NODE_TOKEN" \
-  MASTER_IP="100.118.192.86" \
+  MASTER_IP="192.168.2.153" \
   REMOTE_USER="terenceliu" \
   SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=10" \
   scripts/join-workers.sh
@@ -139,17 +139,17 @@ Manual fallback when helper is not usable:
 
 ```sh
 NODE_TOKEN="$(sudo cat /var/lib/rancher/k3s/server/node-token)"
-ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 terenceliu@100.121.31.95 \
+ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 terenceliu@192.168.2.148 \
   "curl -sfL https://get.k3s.io | \
-   K3S_URL=https://100.118.192.86:6443 \
+   K3S_URL=https://192.168.2.153:6443 \
    K3S_TOKEN='$NODE_TOKEN' \
-   INSTALL_K3S_EXEC='agent --node-ip 100.121.31.95 --node-external-ip 100.121.31.95' sh -"
+   INSTALL_K3S_EXEC='agent --node-ip 192.168.2.148 --node-external-ip 192.168.2.148' sh -"
 ```
 
 If worker was previously misconfigured:
 
 ```sh
-ssh terenceliu@100.121.31.95 'sudo /usr/local/bin/k3s-agent-uninstall.sh'
+ssh terenceliu@192.168.2.148 'sudo /usr/local/bin/k3s-agent-uninstall.sh'
 ```
 
 ## Validate cluster after worker join
@@ -171,7 +171,7 @@ Healthy signs:
 SSH to worker fails:
 
 ```sh
-ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 terenceliu@100.121.31.95 'echo ok'
+ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 terenceliu@192.168.2.148 'echo ok'
 ```
 
 Deploy script cannot reach API (local sandbox error such as `socket: operation not permitted`):

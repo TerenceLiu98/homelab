@@ -33,7 +33,7 @@ Host services
     |
     +-- /dev/sda -> /srv/k3s-data
     +-- GlusterFS gv0 mounted at /srv/k3s-data/gluster/mounts/gv0
-    +-- Valkey/Redis on 100.118.192.86:6379 for JuiceFS metadata
+    +-- Valkey/Redis on 192.168.2.153:6379 for JuiceFS metadata
 
 k3s cluster
     |
@@ -124,9 +124,9 @@ Host layout:
 
 JuiceFS uses:
 
-- Metadata: host Valkey/Redis at `100.118.192.86:6379`, database `1`.
+- Metadata: host Valkey/Redis at `192.168.2.153:6379`, database `1`.
 - Object storage: JuiceFS `gluster` backend at
-  `100.118.192.86/gv0/juicefs-objects`.
+  `192.168.2.153/gv0/juicefs-objects`.
 - Kubernetes access: `juicefs-sc` StorageClass through JuiceFS CSI, with
   dynamic PV paths left at the CSI driver's default `pvc-<uuid>` directory
   names so a deleted and recreated same-name PVC does not accidentally reuse
@@ -147,12 +147,8 @@ application PVCs should either omit `storageClassName` or explicitly use
 `juicefs-sc`. A node-scoped `local-path-thinkpad` StorageClass exists for
 workloads that need local disk on `thinkpadx13-2022`.
 
-The cluster uses Tailscale node IPs as k3s internal and external node addresses.
-Because Cilium creates per-node PodCIDR router addresses, Tailscale can discover
-those `10.42.0.0/16` addresses as candidate direct WireGuard endpoints. The
-`platform-network` app installs a small privileged DaemonSet that rejects
-outbound UDP/41641 traffic to the Cilium PodCIDR so Tailscale falls back to a
-valid route instead of stalling on unroutable PodCIDR endpoints.
+The cluster uses intranet node IPs as k3s internal and external node addresses,
+with Cilium as the only CNI. No Tailscale is involved.
 
 ## Ingress
 

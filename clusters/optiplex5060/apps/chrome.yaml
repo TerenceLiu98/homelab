@@ -1,20 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: platform-network
+  name: chrome
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/TerenceLiu98/homelab.git
     targetRevision: experimental
-    path: platform/network
+    path: platform/chrome
   destination:
     server: https://kubernetes.default.svc
-    namespace: kube-system
+    namespace: chrome
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
+      - CreateNamespace=true
       - ServerSideApply=true

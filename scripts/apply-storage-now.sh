@@ -19,8 +19,8 @@ rand() {
 
 $KUBECTL create namespace storage --dry-run=client -o yaml | $KUBECTL apply -f -
 
-NODE_IP="$(ip -4 addr show tailscale0 2>/dev/null | awk '/ inet / { sub("/.*", "", $2); print $2; exit }')"
-NODE_IP="${NODE_IP:-100.118.192.86}"
+NODE_IP="$(ip -4 addr show eno1 2>/dev/null | awk '/ inet / { sub("/.*", "", $2); print $2; exit }')"
+NODE_IP="${NODE_IP:-192.168.2.153}"
 
 if [ -f /etc/valkey/k3s-juicefs.pass ]; then
   REDIS_PASSWORD="$(cat /etc/valkey/k3s-juicefs.pass)"

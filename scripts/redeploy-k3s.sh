@@ -1,13 +1,13 @@
 #!/usr/bin/env sh
 set -eu
 
-MASTER_IP="${MASTER_IP:-100.118.192.86}"
-WORKER_IPS="${WORKER_IPS-100.121.31.95 100.85.172.81}"
+MASTER_IP="${MASTER_IP:-192.168.2.153}"
+WORKER_IPS="${WORKER_IPS-192.168.2.148 192.168.2.197}"
 REMOTE_USER="${REMOTE_USER:-terenceliu}"
 [ -z "${REMOTE_SSH:-}" ] && REMOTE_SSH="ssh -F /dev/null -o StrictHostKeyChecking=no"
 INSTALL_HELM="${INSTALL_HELM:-1}"
 UNINSTALL_PREVIOUS="${UNINSTALL_PREVIOUS:-1}"
-CILIUM_MTU="${CILIUM_MTU:-1230}"
+CILIUM_MTU="${CILIUM_MTU:-1500}"
 
 if [ "$(id -u)" -ne 0 ]; then
   echo "Run this script as root on optiplex5060." >&2
@@ -26,7 +26,7 @@ fi
 
 uninstall_node() {
   ip="$1"
-  ${REMOTE_SSH} "${REMOTE_USER}@${ip}" "if command -v k3s >/dev/null 2>&1; then if [ -x /usr/local/bin/k3s-agent-uninstall.sh ]; then /usr/local/bin/k3s-agent-uninstall.sh; else k3s-killall.sh || true; fi; fi; for table in nat filter mangle raw; do for chain in OLD_CILIUM_PRE_nat OLD_CILIUM_POST_nat OLD_CILIUM_OUTPUT_nat OLD_CILIUM_INPUT OLD_CILIUM_OUTPUT OLD_CILIUM_FORWARD; do if sudo iptables -t \"\$table\" -S \"\$chain\" >/dev/null 2>&1; then sudo iptables -t \"\$table\" -F \"\$chain\" || true; sudo iptables -t \"\$table\" -X \"\$chain\" || true; fi; done; done"
+  ${REMOTE_SSH} "${REMOTE_USER}@${ip}" "if command -v k3s >/dev/null 2>&1; then if [ -x /usr/local/bin/k3s-agent-uninstall.sh ]; then sudo /usr/local/bin/k3s-agent-uninstall.sh; else sudo k3s-killall.sh || true; fi; fi; for table in nat filter mangle raw; do for chain in OLD_CILIUM_PRE_nat OLD_CILIUM_POST_nat OLD_CILIUM_OUTPUT_nat OLD_CILIUM_INPUT OLD_CILIUM_OUTPUT OLD_CILIUM_FORWARD; do if sudo iptables -t \"\$table\" -S \"\$chain\" >/dev/null 2>&1; then sudo iptables -t \"\$table\" -F \"\$chain\" || true; sudo iptables -t \"\$table\" -X \"\$chain\" || true; fi; done; done"
 }
 
 cleanup_old_cilium_chains() {
@@ -87,11 +87,9 @@ if [ "$INSTALL_HELM" = "1" ]; then
   fi
 fi
 
-scripts/patch-metrics-server-tailscale.sh
-
 for ip in $WORKER_IPS; do
   NODE_TOKEN="$(cat /var/lib/rancher/k3s/server/node-token)"
-  ${REMOTE_SSH} "${REMOTE_USER}@${ip}" "curl -sfL https://get.k3s.io | K3S_URL=https://${MASTER_IP}:6443 K3S_TOKEN='${NODE_TOKEN}' INSTALL_K3S_EXEC='agent --node-ip ${ip} --node-external-ip ${ip}' sh -"
+  ${REMOTE_SSH} "${REMOTE_USER}@${ip}" "curl -sfL https://get.k3s.io | K3S_URL=https://${MASTER_IP}:6443 K3S_TOKEN='${NODE_TOKEN}' INSTALL_K3S_EXEC='agent --node-ip ${ip} --node-external-ip ${ip} --data-dir /srv/k3s-agent --node-label kubeflow-compute=true --node-taint workload=kubeflow:NoSchedule --kubelet-arg image-gc-high-threshold=75 --kubelet-arg image-gc-low-threshold=65 --kubelet-arg eviction-hard=memory.available<1Gi,nodefs.available<10%,imagefs.available<15%' sh -"
 done
 
 scripts/prepare-host-redis.sh "${MASTER_IP}"

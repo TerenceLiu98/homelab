@@ -3,6 +3,8 @@ set -eu
 
 DEVICE=/dev/sda
 CONFIRM=no
+ROLE=server
+SERVER_IP=192.168.2.153
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -14,6 +16,14 @@ while [ "$#" -gt 0 ]; do
       CONFIRM=yes
       shift
       ;;
+    --role)
+      ROLE="$2"
+      shift 2
+      ;;
+    --server-ip)
+      SERVER_IP="$2"
+      shift 2
+      ;;
     *)
       echo "Unknown argument: $1" >&2
       exit 1
@@ -24,6 +34,22 @@ done
 if [ "$(id -u)" -ne 0 ]; then
   echo "Run as root." >&2
   exit 1
+fi
+
+if [ "$ROLE" = "agent" ]; then
+  if ! command -v mount.glusterfs >/dev/null 2>&1; then
+    echo "glusterfs client is not installed; run scripts/install-host-tools-arch.sh first." >&2
+    exit 1
+  fi
+  mkdir -p /srv/k3s-data/gluster/mounts/gv0
+  if ! findmnt -rn /srv/k3s-data/gluster/mounts/gv0 >/dev/null 2>&1; then
+    mount -t glusterfs "${SERVER_IP}":/gv0 /srv/k3s-data/gluster/mounts/gv0
+  fi
+  if ! grep -q '/srv/k3s-data/gluster/mounts/gv0' /etc/fstab; then
+    printf '%s:/gv0 /srv/k3s-data/gluster/mounts/gv0 glusterfs defaults,_netdev 0 0\n' "${SERVER_IP}" >> /etc/fstab
+  fi
+  echo "Agent storage prepared: gv0 mounted from ${SERVER_IP} at /srv/k3s-data/gluster/mounts/gv0"
+  exit 0
 fi
 
 if [ "$CONFIRM" != yes ]; then
