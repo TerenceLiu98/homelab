@@ -22,6 +22,17 @@ spec:
               name: kubeflow-user-example-com
             $patch: delete
         - target:
+            kind: Namespace
+            name: oauth2-proxy
+            version: v1
+          patch: |-
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: oauth2-proxy
+              labels:
+                istio-injection: enabled
+        - target:
             group: apps
             version: v1
             kind: Deployment
