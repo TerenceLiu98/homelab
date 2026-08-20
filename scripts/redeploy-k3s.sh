@@ -2,6 +2,10 @@
 set -eu
 
 MASTER_IP="${MASTER_IP:-192.168.2.153}"
+# External IP advertised for the control-plane node (ingress/loadbalancer egress).
+# The optiplex5060's Tailscale IP is 100.118.192.86; keep node-ip on the intranet
+# while exposing ingress over Tailscale.
+MASTER_EXTERNAL_IP="${MASTER_EXTERNAL_IP:-100.118.192.86}"
 WORKER_IPS="${WORKER_IPS-192.168.2.148 192.168.2.197}"
 REMOTE_USER="${REMOTE_USER:-terenceliu}"
 [ -z "${REMOTE_SSH:-}" ] && REMOTE_SSH="ssh -F /dev/null -o StrictHostKeyChecking=no"
@@ -61,7 +65,7 @@ if [ "${SKIP_HOST_STORAGE_CHECK:-0}" != "1" ]; then
 fi
 
 curl -sfL https://get.k3s.io | \
-  INSTALL_K3S_EXEC="server --node-ip ${MASTER_IP} --node-external-ip ${MASTER_IP} --advertise-address ${MASTER_IP} --tls-san ${MASTER_IP} --flannel-backend=none --disable-network-policy --disable local-storage --write-kubeconfig-mode 0644" \
+  INSTALL_K3S_EXEC="server --node-ip ${MASTER_IP} --node-external-ip ${MASTER_EXTERNAL_IP} --advertise-address ${MASTER_IP} --tls-san ${MASTER_IP},${MASTER_EXTERNAL_IP} --flannel-backend=none --disable-network-policy --disable local-storage --write-kubeconfig-mode 0644" \
   sh -
 
 if command -v k3s >/dev/null 2>&1; then
