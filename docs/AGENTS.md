@@ -166,6 +166,22 @@ Healthy signs:
 - no `node.kubernetes.io/unreachable`
 - Argo/CD pods eventually all `Running` with ready probes passing
 
+## JuiceFS mount rebuild checklist
+
+When JuiceFS mount pods (`kube-system/juicefs-*-pvc-*`) are deleted/recreated (e.g. after
+changing `mountOptions`), running consumers keep a stale FUSE mount ("Transport endpoint is
+not connected" / "Socket not connected"). Restart every pod that uses a `juicefs-sc` PVC:
+
+```sh
+sudo k3s kubectl get pvc -A   # find claim users
+sudo k3s kubectl delete pod -n identity -l app.kubernetes.io/name=dex --wait=false
+sudo k3s kubectl delete pod -n terenceliu development-0 --wait=false
+```
+
+Current known consumers: `identity/dex-data` (dex), `terenceliu/data`+`terenceliu/homespace`
+(development-0). Argo CD OIDC login fails with `503 Service Unavailable: no available server`
+until dex is restarted.
+
 ## Troubleshooting
 
 SSH to worker fails:
