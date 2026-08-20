@@ -47,6 +47,7 @@ resources:
   - https://github.com/kubeflow/manifests//applications/pvcviewer-controller/upstream/base?ref=v1.11.0
   - https://github.com/kubeflow/manifests//applications/volumes-web-app/upstream/overlays/istio?ref=v1.11.0
   - knative-autoscaler-destinationrule.yaml
+  - oauth2-proxy-authorizationpolicy.yaml
 
 components:
   - https://github.com/kubeflow/manifests//common/security/PSS/dynamic/baseline?ref=v1.11.0

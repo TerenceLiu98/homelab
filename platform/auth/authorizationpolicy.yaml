@@ -1,0 +1,12 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-all
+  namespace: identity
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dex
+  action: ALLOW
+  rules:
+    - {}
