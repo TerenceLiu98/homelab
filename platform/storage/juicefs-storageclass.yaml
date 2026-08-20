@@ -13,6 +13,13 @@ mountOptions:
   - cache-size=30720
   - free-space-ratio=0.20
   - writeback_cache
+  - attr-cache=5
+  - entry-cache=5
+  - dir-entry-cache=5
+  - readdir-cache
+  - cache-large-write
+  - max-uploads=64
+  - prefetch=4
 parameters:
   csi.storage.k8s.io/provisioner-secret-name: juicefs-sc-secret
   csi.storage.k8s.io/provisioner-secret-namespace: kube-system
