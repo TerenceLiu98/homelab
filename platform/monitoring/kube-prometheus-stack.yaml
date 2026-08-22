@@ -71,6 +71,62 @@ spec:
         podMonitorSelectorNilUsesHelmValues: false
         probeSelectorNilUsesHelmValues: false
         ruleSelectorNilUsesHelmValues: false
+        additionalScrapeConfigs:
+          # Istio envoy sidecars: every pod with an istio-proxy container
+          - job_name: istio-envoy-sidecars
+            metrics_path: /stats/prometheus
+            kubernetes_sd_configs:
+              - role: pod
+            relabel_configs:
+              - source_labels:
+                  [__meta_kubernetes_pod_container_name]
+                action: keep
+                regex: istio-proxy
+              - source_labels: [__meta_kubernetes_pod_ip]
+                action: replace
+                regex: (.+)
+                target_label: __address__
+                replacement: ${1}:15090
+              - source_labels: [__meta_kubernetes_namespace]
+                action: replace
+                target_label: namespace
+              - source_labels: [__meta_kubernetes_pod_name]
+                action: replace
+                target_label: pod
+          # Cilium agent metrics (:9962, enabled via redeploy-k3s.sh helm sets)
+          - job_name: cilium-agent
+            kubernetes_sd_configs:
+              - role: pod
+                namespaces:
+                  names:
+                    - kube-system
+            relabel_configs:
+              - source_labels:
+                  [__meta_kubernetes_pod_label_k8s_app]
+                action: keep
+                regex: cilium
+              - source_labels: [__meta_kubernetes_pod_ip]
+                action: replace
+                regex: (.+)
+                target_label: __address__
+                replacement: ${1}:9962
+          # Cilium operator metrics (:9963)
+          - job_name: cilium-operator
+            kubernetes_sd_configs:
+              - role: pod
+                namespaces:
+                  names:
+                    - kube-system
+            relabel_configs:
+              - source_labels:
+                  [__meta_kubernetes_pod_label_io_cilium_k8s_app]
+                action: keep
+                regex: cilium-operator
+              - source_labels: [__meta_kubernetes_pod_ip]
+                action: replace
+                regex: (.+)
+                target_label: __address__
+                replacement: ${1}:9963
 
     alertmanager:
       tolerations:
