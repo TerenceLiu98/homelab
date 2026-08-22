@@ -51,6 +51,9 @@ spec:
         retentionSize: 8GB
         scrapeInterval: 30s
         evaluationInterval: 60s
+        # local-path-thinkpad provisioner only serves this node
+        nodeSelector:
+          kubernetes.io/hostname: thinkpadx13-2022
         resources:
           requests:
             cpu: 300m
@@ -105,9 +108,9 @@ spec:
       resources:
         requests:
           cpu: 50m
-          memory: 128Mi
-        limits:
           memory: 256Mi
+        limits:
+          memory: 512Mi
       persistence:
         enabled: false
       testFramework:
