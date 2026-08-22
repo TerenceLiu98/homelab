@@ -41,11 +41,6 @@ spec:
           memory: 512Mi
 
     prometheus:
-      tolerations:
-        - key: workload
-          operator: Equal
-          value: kubeflow
-          effect: NoSchedule
       prometheusSpec:
         retention: 7d
         retentionSize: 8GB
@@ -54,6 +49,11 @@ spec:
         # local-path-thinkpad provisioner only serves this node
         nodeSelector:
           kubernetes.io/hostname: thinkpadx13-2022
+        tolerations:
+          - key: workload
+            operator: Equal
+            value: kubeflow
+            effect: NoSchedule
         resources:
           requests:
             cpu: 300m
@@ -148,15 +148,6 @@ spec:
         analytics:
           reporting_enabled: false
           check_for_updates: false
-      datasources:
-        datasources.yaml:
-          apiVersion: 1
-          datasources:
-            - name: Prometheus
-              type: prometheus
-              url: http://kps-kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
-              access: proxy
-              isDefault: true
 
     kube-state-metrics:
       tolerations:
