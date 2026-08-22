@@ -11,14 +11,4 @@ configMapGenerator:
       labels:
         grafana_dashboard: "1"
     files:
-      - dashboards/node-exporter-full.json
-      - dashboards/istio-mesh-dashboard.json
-      - dashboards/istio-service-dashboard.json
-      - dashboards/istio-workload-dashboard.json
-      - dashboards/pilot-dashboard.json
-      - dashboards/istio-performance-dashboard.json
-      - dashboards/istio-extension-dashboard.json
-      - dashboards/ztunnel-dashboard.json
-      - dashboards/cilium-dashboard.json
-      - dashboards/cilium-operator-dashboard.json
-      - dashboards/hubble-dashboard.json
+      - dashboards/homelab-aio.json
