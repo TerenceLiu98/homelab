@@ -26,6 +26,8 @@ require_env \
   DEX_LOCAL_ADMIN_EMAIL \
   DEX_LOCAL_ADMIN_USERNAME \
   DEX_LOCAL_ADMIN_BCRYPT_HASH \
+  GRAFANA_OIDC_CLIENT_SECRET \
+  GRAFANA_ADMIN_PASSWORD \
   JUICEFS_NAME \
   JUICEFS_META_PASSWORD \
   JUICEFS_META_HOST \
@@ -53,6 +55,11 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: oauth2-proxy
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
 ---
 apiVersion: v1
 kind: Secret
@@ -107,6 +114,11 @@ stringData:
         secret: "${GITEA_OIDC_CLIENT_SECRET}"
         redirectURIs:
           - https://git.${BASE_DOMAIN}/user/oauth2/dex/callback
+      - id: grafana
+        name: Grafana
+        secret: "${GRAFANA_OIDC_CLIENT_SECRET}"
+        redirectURIs:
+          - https://grafana.${BASE_DOMAIN}/login/generic_oauth
     connectors:
       - type: github
         id: github
@@ -146,6 +158,26 @@ type: Opaque
 stringData:
   username: "${GITEA_ADMIN_USERNAME}"
   password: "${GITEA_ADMIN_PASSWORD}"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: grafana-oauth-dex
+  namespace: monitoring
+type: Opaque
+stringData:
+  client-id: "grafana"
+  client-secret: "${GRAFANA_OIDC_CLIENT_SECRET}"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: grafana-admin
+  namespace: monitoring
+type: Opaque
+stringData:
+  admin-user: "admin"
+  admin-password: "${GRAFANA_ADMIN_PASSWORD}"
 ---
 apiVersion: v1
 kind: Secret

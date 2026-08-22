@@ -1,0 +1,173 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: kube-prometheus-stack
+  namespace: kube-system
+spec:
+  repo: https://prometheus-community.github.io/helm-charts
+  chart: kube-prometheus-stack
+  version: 88.5.2
+  targetNamespace: monitoring
+  createNamespace: false
+  valuesContent: |-
+    fullnameOverride: kps
+
+    # k3s specifics: components bind localhost / are replaced by Cilium
+    kubeEtcd:
+      enabled: false
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeProxy:
+      enabled: false
+    coreDns:
+      enabled: true
+
+    defaultRules:
+      create: true
+
+    prometheusOperator:
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: kubeflow
+          effect: NoSchedule
+      resources:
+        requests:
+          cpu: 100m
+          memory: 192Mi
+        limits:
+          memory: 512Mi
+
+    prometheus:
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: kubeflow
+          effect: NoSchedule
+      prometheusSpec:
+        retention: 7d
+        retentionSize: 8GB
+        scrapeInterval: 30s
+        evaluationInterval: 60s
+        resources:
+          requests:
+            cpu: 300m
+            memory: 1Gi
+          limits:
+            memory: 2Gi
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-path-thinkpad
+              resources:
+                requests:
+                  storage: 15Gi
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelectorNilUsesHelmValues: false
+        probeSelectorNilUsesHelmValues: false
+        ruleSelectorNilUsesHelmValues: false
+
+    alertmanager:
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: kubeflow
+          effect: NoSchedule
+      alertmanagerSpec:
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            memory: 128Mi
+        retention: 120h
+      config:
+        route:
+          group_by:
+            - alertname
+            - namespace
+          receiver: 'null'
+        receivers:
+          - name: 'null'
+
+    grafana:
+      admin:
+        existingSecret: grafana-admin
+        userKey: admin-user
+        passwordKey: admin-password
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: kubeflow
+          effect: NoSchedule
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          memory: 256Mi
+      persistence:
+        enabled: false
+      testFramework:
+        enabled: false
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        hosts:
+          - grafana.initio.cc
+        tls:
+          - secretName: initio-cc-tls
+            hosts:
+              - grafana.initio.cc
+      envValueFrom:
+        GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
+          secretKeyRef:
+            name: grafana-oauth-dex
+            key: client-secret
+      grafana.ini:
+        server:
+          domain: grafana.initio.cc
+          root_url: https://grafana.initio.cc
+        auth.generic_oauth:
+          enabled: true
+          name: Dex
+          icon: signin
+          client_id: grafana
+          auth_url: https://auth.initio.cc/auth
+          token_url: http://dex.identity.svc.cluster.local:5556/token
+          api_url: http://dex.identity.svc.cluster.local:5556/userinfo
+          scopes: "openid profile email groups"
+          allow_sign_up: true
+        users:
+          auto_assign_org_role: Editor
+        analytics:
+          reporting_enabled: false
+          check_for_updates: false
+      datasources:
+        datasources.yaml:
+          apiVersion: 1
+          datasources:
+            - name: Prometheus
+              type: prometheus
+              url: http://kps-kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+              access: proxy
+              isDefault: true
+
+    kube-state-metrics:
+      tolerations:
+        - key: workload
+          operator: Equal
+          value: kubeflow
+          effect: NoSchedule
+      resources:
+        requests:
+          cpu: 50m
+          memory: 100Mi
+        limits:
+          memory: 256Mi
+
+    prometheus-node-exporter:
+      tolerations:
+        - operator: Exists
