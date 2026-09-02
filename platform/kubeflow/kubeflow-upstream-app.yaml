@@ -385,7 +385,7 @@ spec:
                   # Affinity
                   ################################################################
                   affinityConfig:
-                    readOnly: true
+                    readOnly: false
 
                     # the `configKey` of the default affinity config
                     # (to have no default, set as "")
@@ -395,7 +395,7 @@ spec:
                     # the list of available affinity configs in the dropdown
                     options:
                       - configKey: "kubeflow_compute"
-                        displayName: "Kubeflow Compute Nodes"
+                        displayName: "Kubeflow Compute Nodes (Any)"
                         affinity:
                           nodeAffinity:
                             requiredDuringSchedulingIgnoredDuringExecution:
@@ -405,6 +405,28 @@ spec:
                                       operator: "In"
                                       values:
                                         - "true"
+                      - configKey: "thinkpadx13_2022"
+                        displayName: "ThinkPad X13 2022"
+                        affinity:
+                          nodeAffinity:
+                            requiredDuringSchedulingIgnoredDuringExecution:
+                              nodeSelectorTerms:
+                                - matchExpressions:
+                                    - key: "kubernetes.io/hostname"
+                                      operator: "In"
+                                      values:
+                                        - "thinkpadx13-2022"
+                      - configKey: "macbook_2015"
+                        displayName: "MacBook Pro 2015"
+                        affinity:
+                          nodeAffinity:
+                            requiredDuringSchedulingIgnoredDuringExecution:
+                              nodeSelectorTerms:
+                                - matchExpressions:
+                                    - key: "kubernetes.io/hostname"
+                                      operator: "In"
+                                      values:
+                                        - "terenceliumacbookpro2015"
                     #options:
                     #  - configKey: "dedicated_node_per_notebook"
                     #    displayName: "Dedicated Node Per Notebook"
