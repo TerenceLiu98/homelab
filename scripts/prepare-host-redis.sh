@@ -15,7 +15,7 @@ fi
 CNI_IP="${CNI_IP:-$(ip -4 addr show cilium_host 2>/dev/null | awk '/ inet / { sub("/.*", "", $2); print $2; exit }')}"
 PASS_FILE=/etc/valkey/k3s-juicefs.pass
 CONF=/etc/valkey/valkey.conf
-DATA_DIR=/srv/k3s-data/redis
+DATA_DIR=/var/lib/valkey/juicefs
 
 if [ ! -f "$CONF" ]; then
   echo "$CONF does not exist; install valkey or redis first." >&2
@@ -23,6 +23,11 @@ if [ ! -f "$CONF" ]; then
 fi
 
 mkdir -p "$DATA_DIR"
+# Avoid copy-on-write amplification for Valkey persistence when the system disk
+# supports the NoCoW directory attribute (for example, Btrfs).
+if command -v chattr >/dev/null 2>&1; then
+  chattr +C "$DATA_DIR" 2>/dev/null || true
+fi
 chown valkey:valkey "$DATA_DIR"
 chmod 0750 "$DATA_DIR"
 

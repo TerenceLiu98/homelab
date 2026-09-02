@@ -119,7 +119,8 @@ Host layout:
 
 - `/srv/k3s-data/gluster/bricks/gv0` for the GlusterFS brick.
 - `/srv/k3s-data/gluster/mounts/gv0` for the mounted GlusterFS volume.
-- `/srv/k3s-data/redis` for Valkey/Redis metadata persistence.
+- `/var/lib/valkey/juicefs` on the system disk, with NoCoW where supported, for
+  Valkey/Redis metadata persistence.
 - `/srv/k3s-data/backups` reserved for backups.
 
 JuiceFS uses:
